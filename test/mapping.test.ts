@@ -28,6 +28,31 @@ test('工商映射提取扩展字段与官网 URL，不把网站名称当作链�
   assert.deepEqual(basic.websites, ['https://example.test']);
 });
 
+test('联网核对发现的映射错误：参保人数、注册号、国标行业', () => {
+  // 企查查 Staffs.s 是年份，人数在 Staffs.c
+  assert.equal(basicDetails('qichacha', { Staffs: { c: 51843, s: '2025' } }).insuredEmployees, '51843');
+  // 爱企查 regNo 实际是信用代码，注册号在 regCode / licenseNumber
+  const aqc = basicDetails('aiqicha', { regNo: '91000000000000000X', regCode: '440300000000001' });
+  assert.equal(aqc.registrationNumber, '440300000000001');
+  assert.equal(basicDetails('aiqicha', { regNo: '91000000000000000X', licenseNumber: '440300000000002' }).registrationNumber, '440300000000002');
+  // 天眼查上市公司 industry 是平台自有分类，国标在 industry2017
+  assert.equal(basicDetails('tianyancha', { industry: '汽车 — 乘用车', industry2017: '汽车制造业' }).industry, '汽车制造业');
+  assert.equal(basicDetails('tianyancha', { industry: '软件和信息技术服务业' }).industry, '软件和信息技术服务业');
+});
+
+test('纯符号占位不当作真实值，部分掩码原文保留', () => {
+  const basic = basicDetails('aiqicha', { annualDate: '**', scale: '-', telephone: '-', email: '-', prevEntName: '-',
+    paidinCapital: '-', realCapital: '100万(元)', industry: '—' });
+  assert.equal(basic.approvedAt, null);
+  assert.equal(basic.employeeScale, null);
+  assert.equal(basic.industry, null);
+  assert.equal(basic.paidInCapital, '100万(元)');
+  assert.deepEqual(basic.phones, []);
+  assert.deepEqual(basic.emails, []);
+  assert.deepEqual(basic.formerNames, []);
+  assert.deepEqual(basicDetails('tianyancha', { phoneList: ['0755-2878****', '-'] }).phones, ['0755-2878****']);
+});
+
 test('企查查详情的秒时间戳与毫秒时间戳均正确，股东与人员可归一化', () => {
   const data = { KeyNo: 'a'.repeat(32), Name: '示例', StartDate: 1609459200,
     Partners: [{ StockName: '合成股东', StockPercent: '25%', ShouldCapi: '20万元', ShoudDate: 1609459200 }],

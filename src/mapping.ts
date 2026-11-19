@@ -3,7 +3,7 @@ import { date, object, text, type Source, type BasicDetails, type Money } from '
 // 字段清单独立于请求协议；新平台增加自身映射及 Provider，不影响现有调用方。
 export const basicFieldMappings = {
   tianyancha: {
-    companyType: ['companyOrgType'], industry: ['industry'], registrationNumber: ['regNumber'],
+    companyType: ['companyOrgType'], industry: ['industry2017', 'industry'], registrationNumber: ['regNumber'],
     organizationCode: ['orgNumber'], taxNumber: ['taxNumber', 'taxCode'], paidInCapital: ['actualCapital'],
     registrationAuthority: ['regInstitute', 'registerInstitute'], approvedAt: ['approvedTime', 'approveDate'],
     businessTerm: ['businessTerm'], employeeScale: ['staffNumRange', 'companyScale'], insuredEmployees: ['socialStaffNum'],
@@ -13,12 +13,12 @@ export const basicFieldMappings = {
     companyType: ['EconKind'], industry: ['Industry.SubIndustry', 'Industry.Industry'], registrationNumber: ['No'],
     organizationCode: ['OrgNo'], taxNumber: ['TaxNo'], paidInCapital: ['RecCap'],
     registrationAuthority: ['BelongOrg'], approvedAt: ['CheckDate'], businessTerm: [],
-    employeeScale: ['StaffScale', 'Scale'], insuredEmployees: ['Staffs.s'], formerNames: ['OriginalName'],
+    employeeScale: ['StaffScale', 'Scale'], insuredEmployees: ['Staffs.c'], formerNames: ['OriginalName'],
     phones: ['ContactInfo.PhoneNumber', 'ContactNumber', 'TelList'], emails: ['ContactInfo.Email', 'Email', 'EmailList'],
     websites: ['ContactInfo.WebSite', 'GW']
   },
   aiqicha: {
-    companyType: ['entType', 'orgType'], industry: ['industry'], registrationNumber: ['regNo'],
+    companyType: ['entType', 'orgType'], industry: ['industry'], registrationNumber: ['regCode', 'licenseNumber'],
     organizationCode: ['orgNo'], taxNumber: ['taxNo'], paidInCapital: ['paidinCapital', 'realCapital'],
     registrationAuthority: ['authority'], approvedAt: ['annualDate'], businessTerm: ['openTime'],
     employeeScale: ['scale'], insuredEmployees: ['insuranceInfo.insuranceNum'], formerNames: ['prevEntName'],
@@ -26,15 +26,20 @@ export const basicFieldMappings = {
   }
 } satisfies Record<Source, Record<keyof BasicDetails, string[]>>;
 
+// 爱企查等平台用 "-"、"**" 等纯符号占位表示未公示或无权限，不能当作真实值。
+// 只匹配整串都是占位符号的情况，"0755-2878****" 这类部分掩码原文仍保留。
+export function placeholder(value: unknown): boolean {
+  return typeof value === 'string' && /^[\s\-—–*＊/]+$/.test(value);
+}
 export function at(value: unknown, path: string): unknown {
   return path.split('.').reduce<unknown>((v, key) => object(v)[key], value);
 }
 export function first(value: unknown, paths: readonly string[]): unknown {
-  for (const path of paths) { const v = at(value, path); if (v !== undefined && v !== null && v !== '') return v; }
+  for (const path of paths) { const v = at(value, path); if (v !== undefined && v !== null && v !== '' && !placeholder(v)) return v; }
   return null;
 }
 export function stringList(value: unknown): string[] {
-  const values = Array.isArray(value) ? value : value == null ? [] : [value];
+  const values = (Array.isArray(value) ? value : value == null ? [] : [value]).filter(v => !placeholder(v));
   return [...new Set(values.map(v => typeof v === 'object'
     ? text(first(v, ['Name', 'name', 'Url', 'url', 'phoneNumber', 'phone', 'email', 'value'])) : text(v)).filter((v): v is string => Boolean(v)))];
 }

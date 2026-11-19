@@ -16,8 +16,8 @@
 | 统一字段 | 天眼查 | 企查查 | 爱企查 |
 | --- | --- | --- | --- |
 | `companyType` 企业类型 | companyOrgType | EconKind | entType / orgType |
-| `industry` 行业 | industry | Industry.SubIndustry / Industry.Industry | industry |
-| `registrationNumber` 注册号 | regNumber | No | regNo |
+| `industry` 行业（国标） | industry2017 / industry | Industry.SubIndustry / Industry.Industry | industry |
+| `registrationNumber` 注册号 | regNumber | No | regCode / licenseNumber |
 | `organizationCode` 组织机构代码 | orgNumber | OrgNo | orgNo |
 | `taxNumber` 纳税识别号 | taxNumber / taxCode | TaxNo | taxNo |
 | `paidInCapital` 实缴资本 | actualCapital | RecCap | paidinCapital / realCapital |
@@ -25,13 +25,20 @@
 | `approvedAt` 核准日期 | approvedTime / approveDate | CheckDate（未出现则 null） | annualDate |
 | `businessTerm` 营业期限 | businessTerm 或 fromTime/toTime | TermStart/TeamEnd | openTime |
 | `employeeScale` 人员规模 | staffNumRange / companyScale | StaffScale / Scale | scale |
-| `insuredEmployees` 参保人数原文 | socialStaffNum | Staffs.s | insuranceInfo.insuranceNum |
+| `insuredEmployees` 参保人数原文 | socialStaffNum | Staffs.c | insuranceInfo.insuranceNum |
 | `formerNames` 曾用名数组 | historyNames | OriginalName[].Name | prevEntName |
 | `phones` 电话数组 | phoneNumber / phone / phoneList | ContactInfo.PhoneNumber / ContactNumber / TelList | telephone / phoneinfo |
 | `emails` 邮箱数组 | emailList / email / emails | ContactInfo.Email / Email / EmailList | email / emailinfo |
 | `websites` 官网数组 | websiteList / websites | ContactInfo.WebSite[].Url / GW | officialweb / website |
 
-路径按顺序选择首个非 null 标量，列表合并去重。不存在的字段不会根据其他字段猜值。网页掩码、占位原文、原平台类型代码可能仍出现在字符串字段中；不把它们当作已验证的明文或描述。某些兼容路径未在所有四个样本中出现，实际可得性仍以响应为准。
+路径按顺序选择首个非 null 标量，列表合并去重。整串只由 `-`、`*`、`—`、`/` 等符号组成的占位值（爱企查常见 `"-"`、`"**"`）视为缺失，继续尝试下一路径，最终为 null 或空数组；`0755-2878****` 这类部分掩码原文保留。
+
+映射注意事项（2026-11-19 三平台交叉核对确认）：
+
+- 天眼查 `industry` 对上市公司是平台自有分类（如“汽车 — 乘用车”），未上市企业可能为空；国标门类/大类在 `industry2017`，优先使用。
+- 爱企查 `regNo` 实际返回统一社会信用代码，注册号在 `regCode` / `licenseNumber`。
+- 企查查 `Staffs.s` 是参保数据年份，人数在 `Staffs.c`。
+- 企查查详情未返回 `CheckDate`，爱企查 `annualDate` 在样本中为 `"**"`，两者 `approvedAt` 目前通常为 null；核准日期以天眼查为准。不存在的字段不会根据其他字段猜值。网页掩码、占位原文、原平台类型代码可能仍出现在字符串字段中；不把它们当作已验证的明文或描述。某些兼容路径未在所有四个样本中出现，实际可得性仍以响应为准。
 
 ## 模块输出
 
