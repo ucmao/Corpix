@@ -7,6 +7,7 @@ import { Aiqicha } from '../src/providers/aiqicha.js';
 import { HttpQccTransport, parseQccState } from '../src/qcc-http.js';
 import { HttpClient } from '../src/http.js';
 import { CorpixError } from '../src/errors.js';
+import { date } from '../src/types.js';
 const code = (expected: string) => (e: unknown) => e instanceof CorpixError && e.code === expected;
 
 test('归一金额保留币种单位和精度，比例不猜测无单位百分数', () => {
@@ -32,7 +33,7 @@ test('企查查详情的秒时间戳与毫秒时间戳均正确，股东与人�
     Partners: [{ StockName: '合成股东', StockPercent: '25%', ShouldCapi: '20万元', ShoudDate: 1609459200 }],
     Employees: [{ Name: '合成人员', Job: '董事' }], CountInfo: { PartnersCount: 2, EmployeesCount: 1, BranchCount: 0 }, Branches: [] };
   const a = normalizeQcc(data, true), b = normalizeQcc({ ...data, StartDate: 1609459200000 }, true);
-  assert.equal(a.establishedAt, '2021-01-01T00:00:00.000Z');
+  assert.equal(a.establishedAt, '2021-01-01');
   assert.equal(a.establishedAt, b.establishedAt);
   assert.equal(a.modules?.shareholders.status, 'partial');
   assert.equal(a.modules?.shareholders.complete, false);
@@ -126,4 +127,15 @@ test('爱企查搜索解码数据但保留协议状态，处理别名并识别�
   assert.equal((out.raw as { status: number }).status, 0);
   const denied = new Aiqicha(new HttpClient(1000, async () => Response.json({ status: 1, msg: '权限不足' })), 'synthetic-only');
   await assert.rejects(denied.search({ keyword: '示例', page: 1, pageSize: 10 }), code('ACCESS_DENIED'));
+});
+
+test('工商日期统一为中国本地日历日，字符串日期规范化，无法识别的原文保留', () => {
+  // 北京时间 2000-01-01 00:00，UTC 下仍是 1999-12-31。
+  assert.equal(date(946656000000), '2000-01-01');
+  assert.equal(date(-315648000000), '1960-01-01');
+  assert.equal(date(0), null);
+  assert.equal(date('2000-1-5'), '2000-01-05');
+  assert.equal(date('2000年01月05日'), '2000-01-05');
+  assert.equal(date('2000/01/05 00:00:00'), '2000-01-05');
+  assert.equal(date('无固定期限'), '无固定期限');
 });

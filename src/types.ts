@@ -66,12 +66,19 @@ export function text(value: unknown): string | null {
   const result = String(value).replace(/<[^>]*>/g, '').trim();
   return result || null;
 }
+// 工商日期按中国本地日历日（UTC+8）统一为 YYYY-MM-DD；无法识别的原文（如"无固定期限"）保持不变。
+const CHINA_OFFSET_MS = 8 * 3600 * 1000;
 export function date(value: unknown): string | null {
   if (typeof value === 'number') {
-    const result = new Date(value);
-    return Number.isNaN(result.getTime()) ? null : result.toISOString();
+    if (value === 0 || !Number.isFinite(value)) return null;
+    const result = new Date(value + CHINA_OFFSET_MS);
+    return Number.isNaN(result.getTime()) ? null : result.toISOString().slice(0, 10);
   }
-  return text(value);
+  const raw = text(value);
+  const m = raw?.match(/^(\d{4})[-/.年](\d{1,2})[-/.月](\d{1,2})日?(?:[ T].*)?$/);
+  if (!m) return raw;
+  const [, y, mo, d] = m;
+  return `${y}-${mo!.padStart(2, '0')}-${d!.padStart(2, '0')}`;
 }
 export function total(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;

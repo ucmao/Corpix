@@ -24,7 +24,7 @@ test('天眼查请求包含查询词、分页及 Cookie 映射，并过滤非企
   const out = await new Tianyancha(http, 'auth_token=test-only').search({ keyword: '示例', page: 1, pageSize: 20 });
   assert.equal(out.companies.length, 1);
   assert.equal(out.companies[0]?.name, '示例企业');
-  assert.equal(out.companies[0]?.establishedAt, '1970-01-01T00:00:00.000Z');
+  assert.equal(out.companies[0]?.establishedAt, null);
   assert.equal(out.pagination.total, 1);
   assert.equal(tycHeaders('auth_token=a=b; TYCID=device')['X-AUTH-TOKEN'], 'a=b');
 });

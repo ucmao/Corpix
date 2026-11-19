@@ -1,0 +1,197 @@
+# API 参考
+
+本文是 Corpix HTTP API 的完整说明。快速上手见 [README](../README.md)；字段映射与转换规则见 [统一模型与映射](field-mapping.md)。
+
+配置 `API_KEY` 后，访问 `/api/` 接口需增加 `Authorization: Bearer <API_KEY>` 请求头；`/health` 无需鉴权，仅表示服务存活，不检测上游平台。
+
+## 接口定义
+
+| 方法 | 路径 | 用途 |
+| :--- | :--- | :--- |
+| `GET` | `/health` | 服务健康检查，无需鉴权 |
+| `GET` | `/api/v1/sources` | 来源能力、模式与配置状态 |
+| `POST` | `/api/v1/search` | 按指定平台搜索企业 |
+| `GET` | `/api/v1/companies/:source/:id` | 查询企业详情 |
+
+## 企业搜索
+
+```bash
+curl http://127.0.0.1:3010/api/v1/search \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your-api-key' \
+  -d '{
+    "source": "qichacha",
+    "keyword": "深圳市腾讯计算机系统有限公司",
+    "page": 1,
+    "pageSize": 5
+  }'
+```
+
+### 请求参数（JSON Body）
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+| :--- | :--- | :---: | :--- | :--- |
+| `source` | `string` | 是 | — | `tianyancha` / `qichacha` / `aiqicha` |
+| `keyword` | `string` | 是 | — | 1–100 字符，自动去除首尾空格 |
+| `page` | `number` | 否 | `1` | 整数，范围 1–100；实际分页权限由上游决定 |
+| `pageSize` | `number` | 否 | `20` | 整数，范围 1–20；上游可能截断返回数量 |
+| `raw` | `boolean` | 否 | `false` | 是否附带本次请求的原始响应 |
+
+未设置 `API_KEY` 的本机开发环境可省略鉴权请求头。搜索结果可能包含名称相关但并非目标主体的公司，应结合名称和统一社会信用代码核对。
+
+## 企业详情
+
+将搜索结果中的 `source` 和 `id` 原样用于详情查询。先将下方占位值替换为搜索结果中的企业 ID：
+
+```bash
+COMPANY_ID='your-company-id'
+curl "http://127.0.0.1:3010/api/v1/companies/qichacha/${COMPANY_ID}?raw=false" \
+  -H 'Authorization: Bearer your-api-key'
+```
+
+- 天眼查：数字企业 ID。
+- 企查查：32 位十六进制 `KeyNo`。
+- 爱企查：数字 `pid`，或可通过同源跳转解析的详情页 slug。
+
+**不同平台的企业 ID 不可互换。** 当前不自动合并跨平台结果，也不使用其他平台的数据补齐缺失值。
+
+## 来源能力
+
+`GET /api/v1/sources` 可查看当前模式和能力。`configured` 仅表示已提供配置，`liveVerified` 与 `lastVerifiedAt` 表示历史抽样验证，不保证当前凭据有效或平台实时可用。
+
+## 返回结果示例
+
+以下为合成的详情响应节选，展示基础字段、扩展信息及股东模块；其余扩展字段和模块省略：
+
+```json
+{
+  "source": "aiqicha",
+  "fetchedAt": "2026-11-19T00:00:00.000Z",
+  "companies": [
+    {
+      "source": "aiqicha",
+      "id": "123",
+      "name": "示例科技有限公司",
+      "creditCode": null,
+      "legalRepresentative": "示例法人",
+      "registrationStatus": "开业",
+      "registeredCapital": "100万(元)",
+      "establishedAt": "2020-01-01",
+      "address": "示例注册地址",
+      "businessScope": "软件开发；信息技术咨询服务",
+      "sourceUrl": "https://aiqicha.baidu.com/company_detail_123",
+      "basic": {
+        "companyType": "有限责任公司",
+        "industry": "软件和信息技术服务业",
+        "paidInCapital": "50万(元)",
+        "phones": [],
+        "emails": [],
+        "websites": []
+      },
+      "modules": {
+        "shareholders": {
+          "status": "partial",
+          "items": [
+            {
+              "id": null,
+              "name": "示例股东",
+              "kind": null,
+              "ownershipRatio": 0.5,
+              "ownershipRatioText": "50%",
+              "subscribedCapital": {
+                "text": "50万元",
+                "amount": "50",
+                "currency": "CNY",
+                "unit": "万"
+              },
+              "paidInCapital": null,
+              "subscribedAt": null
+            }
+          ],
+          "total": 2,
+          "returnedCount": 1,
+          "complete": false
+        }
+      }
+    }
+  ]
+}
+```
+
+### 返回字段说明
+
+| 字段 | 说明 |
+| :--- | :--- |
+| `source`、`sourceUrl` | 平台标识及企业原网页链接 |
+| `id`、`name`、`creditCode` | 企业 ID、名称、统一社会信用代码 |
+| `legalRepresentative`、`registrationStatus` | 法定代表人、平台原文登记状态 |
+| `registeredCapital`、`establishedAt` | 注册资本、成立日期 |
+| `address`、`businessScope` | 注册地址、经营范围 |
+| `basic` | 15 个工商扩展字段：类型、行业、注册号、组织机构代码、税号、实缴资本、登记机关、核准日期、营业期限、人员规模、参保人数、曾用名、电话、邮箱、官网 |
+| `modules` | 股东、主要人员、投资、分支机构、变更、年报模块结果 |
+| `fetchedAt` | 本次查询时间，不是工商信息更新时间 |
+| `pagination` | 仅搜索返回，包含 `page`、`pageSize`、`total` |
+| `raw` | 仅显式请求时附带；是当前端点的响应，不包含其他未请求模块 |
+
+缺失标量返回 `null`。资本原文保留币种与单位；模块金额的 `amount` 是原单位下的十进制字符串，不统一换算成元。股比 `25%` 转为 `0.25`，无法可靠解析时保留原文、数值返回 `null`。
+
+成立、核准等工商日期统一为中国本地日历日 `YYYY-MM-DD`，无法识别的日期原文保持不变。爱企查 `raw` 保留未解码的协议响应，标准化字段使用解码后的数据；企查查 HTTP 详情 `raw` 为企业数据的协议封装，不包含 HTML 或用户会话信息。
+
+## 模块状态：不要只判断数组是否为空
+
+每个模块均有 `status`、`items`、`total`、`returnedCount`、`complete`。`not_returned` 表示本次没有取得明细，**不能认定企业没有记录**；`partial` 表示列表可能被截断。完整状态表、`complete` 的含义及各平台模块范围见 [统一模型与映射 · 模块输出](field-mapping.md#模块输出)。
+
+## 统一错误格式
+
+```json
+{
+  "error": {
+    "code": "AUTH_REQUIRED",
+    "message": "此查询需要有效的上游登录状态"
+  }
+}
+```
+
+| code | HTTP | 含义 |
+| :--- | :---: | :--- |
+| `INVALID_INPUT` | 400 | 参数或 ID 格式无效 |
+| `UNAUTHORIZED` | 401 | Corpix API 密钥无效 |
+| `AUTH_REQUIRED` | 409 | 上游需要登录或会话失效 |
+| `ACCESS_DENIED` | 403 | 上游拒绝访问或账号权限不足 |
+| `RATE_LIMITED` | 429 | 本服务或上游限流 |
+| `NOT_CONFIGURED` | 503 | 缺少 Cookie 或浏览器配置 |
+| `UNSUPPORTED` | 501 | 尚未支持的能力 |
+| `UPSTREAM_BLOCKED` | 502 | 验证页、风控或异常重定向 |
+| `PARSE_ERROR` | 502 | 数据结构变化、未知编码或响应过大 |
+| `UPSTREAM_TIMEOUT` | 504 | 上游或浏览器查询超时 |
+| `UPSTREAM_ERROR` | 502 | 上游连接或业务错误 |
+| `INTERNAL_ERROR` | 500 | 服务内部错误 |
+
+## 后端集成示例（TypeScript）
+
+在服务端保存 Corpix API 密钥，先搜索，再使用命中企业的 ID 获取详情：
+
+```typescript
+const base = 'http://127.0.0.1:3010';
+const authorization = `Bearer ${process.env.CORPIX_API_KEY}`;
+
+async function queryCompany(keyword: string) {
+  const search = await fetch(`${base}/api/v1/search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: authorization },
+    body: JSON.stringify({ source: 'qichacha', keyword, pageSize: 5 })
+  });
+  if (!search.ok) throw new Error(`企业搜索失败：${search.status}`);
+
+  const { companies } = await search.json();
+  const company = companies.find((item: { name: string }) => item.name === keyword);
+  if (!company) return null;
+
+  const detail = await fetch(
+    `${base}/api/v1/companies/${company.source}/${encodeURIComponent(company.id)}`,
+    { headers: { Authorization: authorization } }
+  );
+  if (!detail.ok) throw new Error(`企业详情查询失败：${detail.status}`);
+  return (await detail.json()).companies[0];
+}
+```
