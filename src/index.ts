@@ -5,7 +5,6 @@ export { HttpClient } from './http.js';
 export { Tianyancha } from './providers/tianyancha.js';
 export { Aiqicha } from './providers/aiqicha.js';
 export { Qichacha, type QccTransport } from './providers/qichacha.js';
-export { BrowserQccTransport } from './cdp.js';
 export { HttpQccTransport } from './qcc-http.js';
 export { basicFieldMappings } from './mapping.js';
 export { sourceDefinitions } from './registry.js';

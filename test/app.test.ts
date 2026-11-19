@@ -64,21 +64,18 @@ test('对外监听要求密钥，环境变量拒绝非法值', () => {
   assert.throws(() => loadConfig({ PORT: '-1' }));
   assert.throws(() => loadConfig({ UPSTREAM_TIMEOUT_MS: 'NaN' }));
   assert.equal(loadConfig({ HOST: '0.0.0.0', API_KEY: 'key' }).host, '0.0.0.0');
-  assert.throws(() => loadConfig({ QCC_MODE: 'invalid' }));
-  assert.equal(loadConfig({ QCC_COOKIE: 'synthetic-only', QCC_CDP_URL: 'http://127.0.0.1:9222' }).qccMode, 'http');
-  assert.equal(loadConfig({ QCC_CDP_URL: 'http://127.0.0.1:9222' }).qccMode, 'browser');
 });
 
 test('来源能力与实际模式一致，配置状态不会泄露 Cookie', async t => {
-  for (const mode of ['http', 'browser'] as const) {
-    const config = loadConfig({ QCC_MODE: mode, QCC_COOKIE: 'synthetic-cookie', AQC_COOKIE: 'synthetic-cookie' });
+  for (const cookie of ['synthetic-cookie', ''] as const) {
+    const config = loadConfig({ QCC_COOKIE: cookie, AQC_COOKIE: 'synthetic-cookie' });
     const app = await buildApp({ config }); t.after(() => app.close());
     const response = await app.inject('/api/v1/sources');
     const list = response.json().sources;
     const qcc = list.find((s: { source: string }) => s.source === 'qichacha');
-    assert.equal(qcc.mode, mode);
-    assert.equal(qcc.configured, mode === 'http');
-    assert.equal(qcc.liveVerified, mode === 'http');
+    assert.equal(qcc.mode, 'http');
+    assert.equal(qcc.configured, Boolean(cookie));
+    assert.equal(qcc.liveVerified, true);
     assert.equal(list.find((s: { source: string }) => s.source === 'aiqicha').search, true);
     assert.equal(qcc.modules.investments, 'not_returned');
     assert.doesNotMatch(response.body, /synthetic-cookie/);

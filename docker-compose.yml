@@ -11,7 +11,6 @@ services:
       UPSTREAM_TIMEOUT_MS: ${UPSTREAM_TIMEOUT_MS:-20000}
       TYC_COOKIE: ${TYC_COOKIE:-}
       AQC_COOKIE: ${AQC_COOKIE:-}
-      QCC_MODE: http
       QCC_COOKIE: ${QCC_COOKIE:-}
     init: true
     restart: unless-stopped

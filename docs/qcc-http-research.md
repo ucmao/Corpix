@@ -4,7 +4,7 @@
 
 ## 结论与验证范围
 
-已实现不常驻 Chrome 的 HTTP 模式。初始研究仅完成公开仓库源码核查与 Corpix 本地代码对照；随后使用用户授权会话验证，并正式接入 API，见 [联网验证记录](live-verification.md) 及 [多公司验证元数据](platform-multisample-verification.json)。真实会话过期、搜索后续分页与 CDP 路径仍未验证。下文保留研究时的接入建议，实际实现以 `src/qcc-http.ts` 和 [统一映射说明](field-mapping.md) 为准。
+已实现不常驻 Chrome 的 HTTP 模式。初始研究仅完成公开仓库源码核查与 Corpix 本地代码对照；随后使用用户授权会话验证，并正式接入 API，见 [联网验证记录](live-verification.md) 及 [多公司验证元数据](platform-multisample-verification.json)。真实会话过期、搜索后续分页仍未验证。早期的 CDP 浏览器模式已删除。下文保留研究时的接入建议，实际实现以 `src/qcc-http.ts` 和 [统一映射说明](field-mapping.md) 为准。
 
 Cookie 标识登录会话，不授予额外账号权益。查询所需的登录、会员及其他权限仍由源站判断；有效登录态也不保证请求通过验证或频率限制。不应把 Cookie 过期、权限不足、验证页或响应结构变化处理成搜索无结果。并非所有基础查询都必然要求付费会员，具体范围需逐项验证，不能将参考仓库记录的分页上限当作源站当前规则。
 

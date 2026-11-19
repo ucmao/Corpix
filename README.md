@@ -7,7 +7,7 @@
 <p align="center"><strong>多平台企业信息查询与标准化引擎</strong></p>
 
 > **为企业查询后台、客户管理系统与数据服务提供统一的企业信息接口。**  
-> 输入企业名称，查询**天眼查、企查查、爱企查**，将不同平台的工商字段、股东、主要人员、分支机构及年报索引整理成统一 JSON。基于 **TypeScript + Node.js + Fastify**，默认使用 HTTP 请求，企查查无需常驻 Chrome。
+> 输入企业名称，查询**天眼查、企查查、爱企查**，将不同平台的工商字段、股东、主要人员、分支机构及年报索引整理成统一 JSON。基于 **TypeScript + Node.js + Fastify**，三个平台均使用 HTTP 请求，无需启动浏览器。
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
@@ -84,8 +84,7 @@ curl http://127.0.0.1:3010/api/v1/sources
 在 `.env` 中按需填写：
 
 ```dotenv
-# 默认 HTTP 模式，无需启动 Chrome
-QCC_MODE=http
+# 企查查登录会话（HTTP 请求，无需启动浏览器）
 QCC_COOKIE=your-qcc-cookie
 
 # 爱企查登录会话
@@ -98,7 +97,7 @@ TYC_COOKIE=
 API_KEY=
 ```
 
-Cookie 只由部署者配置，客户端不能通过 API 提交，也不会提升账号权限。全部环境变量与企查查浏览器模式见 [配置说明](docs/configuration.md)。
+Cookie 只由部署者配置，客户端不能通过 API 提交，也不会提升账号权限。全部环境变量见 [配置说明](docs/configuration.md)。
 
 ### 方式二：Docker & Docker Compose
 
@@ -111,7 +110,7 @@ docker compose up -d --build
 docker compose logs -f
 ```
 
-Compose 将服务映射到宿主机 `127.0.0.1:3010`，使用三平台 HTTP 适配器。**当前版本的 Docker 构建与容器运行尚未完成端到端验证。** 可选的企查查浏览器模式建议在本机运行。
+Compose 将服务映射到宿主机 `127.0.0.1:3010`，使用三平台 HTTP 适配器。**当前版本的 Docker 构建与容器运行尚未完成端到端验证。**
 
 ---
 
@@ -169,7 +168,7 @@ curl http://127.0.0.1:3010/api/v1/companies/qichacha/your-company-id \
 | 平台 | 标识 | 搜索 / 详情 | 请求方式与条件 |
 | :--- | :--- | :--- | :--- |
 | 天眼查 | `tianyancha` | 已实现 / 已实现 | HTTP；基础搜索、详情已验证匿名可用，其他权限按源站规则 |
-| 企查查 | `qichacha` | 已实现 / 已实现 | 默认 Cookie + HTTP；可显式选择本机 CDP 浏览器模式 |
+| 企查查 | `qichacha` | 已实现 / 已实现 | HTTP + 有效 Cookie |
 | 爱企查 | `aiqicha` | 已实现 / 已实现 | HTTP + 有效 Cookie；支持数字 pid 与同源 slug 解析 |
 
 各平台已接入的股东、人员、分支、年报等模块范围见 [统一模型与映射](docs/field-mapping.md#模块输出)。启信宝、水滴信用尚未接入，扩展方法见 [新增平台指南](docs/field-mapping.md#新增启信宝水滴信用等来源)。
@@ -181,7 +180,7 @@ curl http://127.0.0.1:3010/api/v1/companies/qichacha/your-company-id \
 | 文档 | 内容 |
 | :--- | :--- |
 | [API 参考](docs/api.md) | 接口参数、返回字段、模块状态、错误码、集成示例 |
-| [配置说明](docs/configuration.md) | 环境变量、安全默认值、企查查浏览器模式 |
+| [配置说明](docs/configuration.md) | 环境变量、安全默认值、平台 Cookie |
 | [统一模型与映射](docs/field-mapping.md) | 字段规则、日期/金额/股比转换、模块范围、新平台接入 |
 | [联网验证记录](docs/live-verification.md) | 验证范围、结果及未覆盖范围 |
 | [架构说明](docs/architecture.md) | 调用链、工程结构与迁移记录 |
@@ -199,6 +198,6 @@ npm run check   # 类型检查 + 离线测试 + 构建
 
 ## 📄 开源许可证与使用范围
 
-自有代码采用 [MIT 许可证](LICENSE)。许可证不授予第三方平台数据、商标或账号权限，使用者应按平台条款及自身授权使用。仓库不分发真实 Cookie、浏览器用户目录、平台数据集、抓包或第三方脚本副本。
+自有代码采用 [MIT 许可证](LICENSE)。许可证不授予第三方平台数据、商标或账号权限，使用者应按平台条款及自身授权使用。仓库不分发真实 Cookie、平台数据集、抓包或第三方脚本副本。
 
 **合规提示：** 本项目通过平台网页接口获取数据，可能与相关平台的用户协议不符；批量抓取或商业使用还可能涉及《反不正当竞争法》《个人信息保护法》等法律风险。请仅在获得授权的范围内、以合理频率使用；商业场景建议优先采用平台官方开放接口。

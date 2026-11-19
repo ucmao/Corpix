@@ -26,7 +26,7 @@ function pageFailure(html: string) {
 export class HttpQccTransport implements QccTransport {
   constructor(private http: HttpClient, private cookie: string) {}
   async request(path: string, method: 'GET' | 'POST', body?: unknown, query = ''): Promise<unknown> {
-    if (!this.cookie) fail('NOT_CONFIGURED', '企查查 HTTP 模式需要配置 QCC_COOKIE', 503);
+    if (!this.cookie) fail('NOT_CONFIGURED', '企查查需要配置 QCC_COOKIE', 503);
     // 每次查询独立维护会话，不将响应 Cookie 持久化或跨并发查询共享。
     const jar = new Map(this.cookie.split(';').flatMap(part => {
       const i = part.indexOf('='); return i < 1 ? [] : [[part.slice(0, i).trim(), part.slice(i + 1).trim()] as const];

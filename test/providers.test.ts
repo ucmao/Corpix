@@ -4,7 +4,6 @@ import { HttpClient, businessError, readBody, MAX_BODY_BYTES } from '../src/http
 import { Tianyancha, tycHeaders } from '../src/providers/tianyancha.js';
 import { Aiqicha, decodeDdw } from '../src/providers/aiqicha.js';
 import { Qichacha, signQcc } from '../src/providers/qichacha.js';
-import { BrowserQccTransport } from '../src/cdp.js';
 import { CorpixError } from '../src/errors.js';
 const code = (expected: string) => (e: unknown) => e instanceof CorpixError && e.code === expected;
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
@@ -108,11 +107,4 @@ test('HTTP 层处理超时、验证页、限流和超大响应，错误不暴露
   await assert.rejects(readBody(new Response('x'.repeat(MAX_BODY_BYTES + 1))), code('PARSE_ERROR'));
   assert.throws(() => businessError({ msg: '会员权限不足' }), code('ACCESS_DENIED'));
   assert.throws(() => businessError({ message: '请求过于频繁' }), code('RATE_LIMITED'));
-});
-
-test('CDP 未配置、非本机地址和错误域名页面均明确失败', async () => {
-  await assert.rejects(new BrowserQccTransport('', 100).request('/company/getDetail', 'GET'), code('NOT_CONFIGURED'));
-  await assert.rejects(new BrowserQccTransport('http://remote.example:9222', 100).request('/company/getDetail', 'GET'), code('NOT_CONFIGURED'));
-  const http = new HttpClient(100, async () => json([{ type: 'page', url: 'https://www.qcc.com.evil.example/' }]));
-  await assert.rejects(new BrowserQccTransport('http://127.0.0.1:9222', 100, http).request('/company/getDetail', 'GET'), code('AUTH_REQUIRED'));
 });

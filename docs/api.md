@@ -159,11 +159,11 @@ curl "http://127.0.0.1:3010/api/v1/companies/qichacha/${COMPANY_ID}?raw=false" \
 | `AUTH_REQUIRED` | 409 | 上游需要登录或会话失效 |
 | `ACCESS_DENIED` | 403 | 上游拒绝访问或账号权限不足 |
 | `RATE_LIMITED` | 429 | 本服务或上游限流 |
-| `NOT_CONFIGURED` | 503 | 缺少 Cookie 或浏览器配置 |
+| `NOT_CONFIGURED` | 503 | 缺少平台 Cookie 配置 |
 | `UNSUPPORTED` | 501 | 尚未支持的能力 |
 | `UPSTREAM_BLOCKED` | 502 | 验证页、风控或异常重定向 |
 | `PARSE_ERROR` | 502 | 数据结构变化、未知编码或响应过大 |
-| `UPSTREAM_TIMEOUT` | 504 | 上游或浏览器查询超时 |
+| `UPSTREAM_TIMEOUT` | 504 | 上游查询超时 |
 | `UPSTREAM_ERROR` | 502 | 上游连接或业务错误 |
 | `INTERNAL_ERROR` | 500 | 服务内部错误 |
 
