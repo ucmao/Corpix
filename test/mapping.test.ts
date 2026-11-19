@@ -40,6 +40,13 @@ test('联网核对发现的映射错误：参保人数、注册号、国标行�
   assert.equal(basicDetails('tianyancha', { industry: '软件和信息技术服务业' }).industry, '软件和信息技术服务业');
 });
 
+test('主要人员职务按分隔符拆成数组', () => {
+  const qcc = companyModules('qichacha', { Employees: [{ Name: '甲', Job: '经理,董事' }], CountInfo: { EmployeesCount: 1 } }, true);
+  assert.deepEqual(qcc.people.items[0]?.positions, ['经理', '董事']);
+  const aqc = companyModules('aiqicha', { directorsData: { list: [{ name: '乙', title: '董事长、总经理，董事' }], total: 1 } }, true);
+  assert.deepEqual(aqc.people.items[0]?.positions, ['董事长', '总经理', '董事']);
+});
+
 test('纯符号占位不当作真实值，部分掩码原文保留', () => {
   const basic = basicDetails('aiqicha', { annualDate: '**', scale: '-', telephone: '-', email: '-', prevEntName: '-',
     paidinCapital: '-', realCapital: '100万(元)', industry: '—' });

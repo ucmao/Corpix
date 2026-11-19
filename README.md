@@ -120,10 +120,20 @@ Compose 将服务映射到宿主机 `127.0.0.1:3010`，使用三平台 HTTP 适�
 | :--- | :--- | :--- |
 | `GET` | `/health` | 服务健康检查，无需鉴权 |
 | `GET` | `/api/v1/sources` | 来源能力、模式与配置状态 |
+| `POST` | `/api/v1/lookup` | 跨平台统一查询：自动兜底或多平台对比 |
 | `POST` | `/api/v1/search` | 按指定平台搜索企业 |
 | `GET` | `/api/v1/companies/:source/:id` | 查询企业详情 |
 
-先搜索，再用结果中的 `source` 和 `id` 查询详情（不同平台的 ID 不可互换）：
+**最简单的用法**：按企业全称或信用代码统一查询。默认按企查查 → 爱企查 → 天眼查的顺序，某个平台失败就自动换下一个；`"strategy": "all"` 会三个平台都查并对比字段：
+
+```bash
+curl http://127.0.0.1:3010/api/v1/lookup \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your-api-key' \
+  -d '{"keyword": "福建正孚软件有限公司"}'
+```
+
+需要指定平台时，先搜索，再用结果中的 `source` 和 `id` 查询详情（不同平台的 ID 不可互换）：
 
 ```bash
 curl http://127.0.0.1:3010/api/v1/search \

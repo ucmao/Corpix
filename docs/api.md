@@ -10,6 +10,7 @@
 | :--- | :--- | :--- |
 | `GET` | `/health` | 服务健康检查，无需鉴权 |
 | `GET` | `/api/v1/sources` | 来源能力、模式与配置状态 |
+| `POST` | `/api/v1/lookup` | 跨平台统一查询：自动兜底或多平台对比 |
 | `POST` | `/api/v1/search` | 按指定平台搜索企业 |
 | `GET` | `/api/v1/companies/:source/:id` | 查询企业详情 |
 
@@ -53,7 +54,70 @@ curl "http://127.0.0.1:3010/api/v1/companies/qichacha/${COMPANY_ID}?raw=false" \
 - 企查查：32 位十六进制 `KeyNo`。
 - 爱企查：数字 `pid`，或可通过同源跳转解析的详情页 slug。
 
-**不同平台的企业 ID 不可互换。** 当前不自动合并跨平台结果，也不使用其他平台的数据补齐缺失值。
+**不同平台的企业 ID 不可互换。** 单平台接口不合并跨平台结果，也不使用其他平台的数据补齐缺失值；需要兜底或对比时使用 [lookup](#跨平台统一查询lookup)。
+
+## 跨平台统一查询（lookup）
+
+按企业**全称**或**统一社会信用代码**查询，由 Corpix 负责搜索、精确匹配和拉取详情，调用方不需要指定平台或处理平台 ID。
+
+```bash
+curl http://127.0.0.1:3010/api/v1/lookup \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer your-api-key' \
+  -d '{ "keyword": "福建正孚软件有限公司", "strategy": "fallback" }'
+```
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+| :--- | :--- | :---: | :--- | :--- |
+| `keyword` | `string` | 是 | — | 企业全称，或 18 位统一社会信用代码（自动识别） |
+| `strategy` | `string` | 否 | `fallback` | `fallback`：按顺序查，第一个成功即返回；`all`：并行查所有平台并对比字段 |
+| `sources` | `string[]` | 否 | `["qichacha","aiqicha","tianyancha"]` | 参与查询的平台及顺序，不可重复 |
+
+**用途：**
+
+- `fallback`：保证可用性。某平台 Cookie 过期、触发风控或权限不足时自动换下一个平台，返回格式不变。
+- `all`：互补与核验。各平台结果分别放在 `results.<平台>`，`comparison` 列出一致与不一致的字段，可据此按模块选用来源或发现数据矛盾。
+
+**匹配规则：** 只接受精确命中。名称比较忽略全角/半角括号和空白；按信用代码查询时，在详情阶段再次核对信用代码。分公司、简称等模糊结果不会被当作目标企业，所有平台都未精确命中时返回 `404 NOT_FOUND`。
+
+**fallback 返回（节选）：**
+
+```json
+{
+  "strategy": "fallback",
+  "keyword": "福建正孚软件有限公司",
+  "matchBy": "name",
+  "source": "aiqicha",
+  "company": { "source": "aiqicha", "id": "...", "name": "福建正孚软件有限公司", "...": "与企业详情相同" },
+  "attempts": [
+    { "source": "qichacha", "status": "error", "durationMs": 463, "error": { "code": "UPSTREAM_BLOCKED", "message": "上游重定向或触发风控" } },
+    { "source": "aiqicha", "status": "ok", "durationMs": 2568 }
+  ]
+}
+```
+
+**all 返回（节选）：**
+
+```json
+{
+  "strategy": "all",
+  "results": { "qichacha": { "...": "..." }, "aiqicha": { "...": "..." }, "tianyancha": { "...": "..." } },
+  "comparison": {
+    "consistentFields": ["name", "creditCode", "legalRepresentative", "..."],
+    "differingFields": ["registrationStatus", "basic.industry", "basic.employeeScale"],
+    "fields": {
+      "registrationStatus": { "consistent": false, "values": { "qichacha": "存续（在营、开业、在册）", "aiqicha": "开业", "tianyancha": "存续" } }
+    }
+  },
+  "attempts": [ "..." ]
+}
+```
+
+`attempts[].status`：`ok` 成功；`not_found` 该平台未精确命中；`skipped` 未配置凭据（附 `NOT_CONFIGURED`），不会发起请求；`error` 查询失败（附统一错误码）。
+
+`comparison` 规则：至少两个平台有值才判断，某平台缺失不算矛盾；对比时忽略括号全/半角、千分位、金额单位写法（`100万人民币` 与 `100万(元)` 视为一致）和参保人数的“人”字。`values` 保留各平台归一化后的原值。行业、人员规模、经营状态等字段平台口径本就不同，出现在 `differingFields` 属正常。**结果不会跨平台合并**，使用某个值时应同时记录其 `source`。
+
+全部平台都没有成功时，返回统一错误格式并附 `attempts`：全部未配置为 `503 NOT_CONFIGURED`，全部未命中为 `404 NOT_FOUND`，其余为 `502 UPSTREAM_ERROR`。lookup 不支持 `raw`，需要某个平台的完整原始响应时，用 `attempts` 或 `company.id` 调用对应平台的详情接口并加 `raw=true`。
 
 ## 来源能力
 

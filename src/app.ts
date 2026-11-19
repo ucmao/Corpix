@@ -5,7 +5,8 @@ import { loadConfig, type Config } from './config.js';
 import { CorpixError, fail } from './errors.js';
 import { sources, type Source, type Provider } from './types.js';
 import { HttpClient } from './http.js';
-import { createProviders, describeSources } from './registry.js';
+import { createProviders, describeSources, sourceDefinitions } from './registry.js';
+import { lookup, defaultLookupOrder, LookupError, type LookupStrategy } from './lookup.js';
 export interface AppOptions { config?: Config; providers?: Record<Source, Provider>; logger?: boolean }
 export async function buildApp(options: AppOptions = {}) {
   const config = options.config ?? loadConfig();
@@ -14,6 +15,7 @@ export async function buildApp(options: AppOptions = {}) {
   const http = new HttpClient(config.timeoutMs);
   const providers = options.providers ?? createProviders(http, config);
   app.setErrorHandler<FastifyError>((error, _request, reply) => {
+    if (error instanceof LookupError) return reply.code(error.statusCode).send({ error: { code: error.code, message: error.message }, attempts: error.attempts });
     if (error instanceof CorpixError) return reply.code(error.statusCode).send({ error: { code: error.code, message: error.message } });
     if (error.statusCode === 429) return reply.code(429).send({ error: { code: 'RATE_LIMITED', message: '请求过于频繁' } });
     if (error.validation || (error.statusCode && error.statusCode >= 400 && error.statusCode < 500)) {
@@ -47,6 +49,17 @@ export async function buildApp(options: AppOptions = {}) {
     const result = await providers[input.source].search({ keyword, page: input.page, pageSize: input.pageSize });
     const { raw: original, ...output } = result;
     return input.raw ? { ...output, raw: original } : output;
+  });
+  app.post<{ Body: { keyword: string; strategy: LookupStrategy; sources: Source[] } }>('/api/v1/lookup', {
+    schema: { body: { type: 'object', additionalProperties: false, required: ['keyword'], properties: {
+      keyword: { type: 'string', minLength: 1, maxLength: 100 },
+      strategy: { type: 'string', enum: ['fallback', 'all'], default: 'fallback' },
+      sources: { type: 'array', minItems: 1, maxItems: sources.length, uniqueItems: true,
+        items: { type: 'string', enum: sources }, default: [...defaultLookupOrder] } } } }
+  }, async (request) => {
+    const { keyword, strategy, sources: order } = request.body;
+    if (!keyword.trim()) fail('INVALID_INPUT', '查询词不能为空', 400);
+    return lookup(providers, s => sourceDefinitions[s].configured(config), { keyword, strategy, sources: order });
   });
   app.get<{ Params: { source: Source; id: string }; Querystring: { raw: boolean } }>('/api/v1/companies/:source/:id', {
     schema: { params: { type: 'object', additionalProperties: false, required: ['source','id'], properties: {

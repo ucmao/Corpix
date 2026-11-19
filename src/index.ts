@@ -8,5 +8,6 @@ export { Qichacha, type QccTransport } from './providers/qichacha.js';
 export { HttpQccTransport } from './qcc-http.js';
 export { basicFieldMappings } from './mapping.js';
 export { sourceDefinitions } from './registry.js';
+export { lookup, compareCompanies, defaultLookupOrder, type LookupInput, type LookupResult, type LookupAttempt, type LookupStrategy } from './lookup.js';
 export type { Source, Company, Provider, QueryResult, SearchInput } from './types.js';
 export type { BasicDetails, CompanyModules, DataModule, ModuleStatus, Shareholder, Person, RelatedCompany, ChangeRecord, AnnualReport, Money } from './types.js';

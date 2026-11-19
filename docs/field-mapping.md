@@ -2,7 +2,7 @@
 
 ## 实现与范围
 
-现有 9 个基础字段及 `source`、`sourceUrl` 保持兼容。每家企业增加 `basic` 工商扩展信息和 `modules` 模块结果，全部由 TypeScript 适配器归一化。三个来源不自动合并、不互换企业 ID；跨平台匹配可使用统一社会信用代码核对，但本版本不覆盖其他来源的值。
+现有 9 个基础字段及 `source`、`sourceUrl` 保持兼容。每家企业增加 `basic` 工商扩展信息和 `modules` 模块结果，全部由 TypeScript 适配器归一化。三个来源不自动合并、不互换企业 ID，也不用一个来源的值覆盖另一个来源。跨平台兜底与字段对比由 [lookup 接口](api.md#跨平台统一查询lookup) 提供，结果始终标明来源。
 
 - `src/mapping.ts`：可检查的工商字段路径表，以及日期、比例、金额等转换。
 - `src/modules.ts`：嵌套列表映射、缺失/受限/截断状态。
@@ -95,7 +95,7 @@
 
 比例 `25%` 转为 `0.25`；无单位数值只接受 0–1，不把 `25` 猜成百分数。原文保留在 `ownershipRatioText`。金额保留 `{text, amount, currency, unit}`：`amount` 为不改变原单位的十进制字符串，例如 100 万元是 amount="100"、unit="万"，不是 100 元。无法解析或掩码则 amount=null，原文仍保留。缺失币种不擅自补为人民币。
 
-主要人员：`id`、`name`、`positions`，分别映射企查查 Name/Job 与爱企查 name/title。
+主要人员：`id`、`name`、`positions`，分别映射企查查 Name/Job 与爱企查 name/title。两个平台都把多个职务写在同一个字符串里（如 `经理,董事`），按 `,`、`，`、`、`、`;`、`；`、`/` 拆成数组并去重，保留平台原始顺序。
 
 分支机构：`id`、`name`、`status`、`legalRepresentative`、`ownershipRatio`；分支未给出股比时该字段为 null。年报：`year`、`title`、`url`，不是年报全文或财务报表。
 

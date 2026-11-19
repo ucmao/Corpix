@@ -28,10 +28,14 @@ function shareholder(source: Source, v: unknown): Shareholder | null {
     subscribedCapital: money(qcc ? p.ShouldCapi : p.subMoney), paidInCapital: money(qcc ? p.RealCapi : p.realMoney),
     subscribedAt: qccDate(qcc ? p.ShoudDate : p.subDate), kind: text(qcc ? p.StockType : p.shareholderType) };
 }
+// 两个平台都把多个职务合在一个字符串里（如 "经理,董事"），按常见分隔符拆分并去重。
+function positions(value: unknown): string[] {
+  return [...new Set(stringList(value).flatMap(v => v.split(/[,，、;；/]/)).map(v => v.trim()).filter(Boolean))];
+}
 function person(source: Source, v: unknown): Person | null {
   const p = object(v), name = text(source === 'qichacha' ? p.Name : p.name);
   return name ? { id: text(source === 'qichacha' ? p.KeyNo : p.personId), name,
-    positions: stringList(source === 'qichacha' ? p.Job : p.title) } : null;
+    positions: positions(source === 'qichacha' ? p.Job : p.title) } : null;
 }
 function related(source: Source, v: unknown): RelatedCompany | null {
   const p = object(v), qcc = source === 'qichacha', name = text(qcc ? p.Name : p.entName);
