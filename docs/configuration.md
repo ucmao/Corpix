@@ -23,6 +23,8 @@
 
 Cookie 只由服务部署者设置，客户端不能通过 API 提交。Cookie 对应账号的现有权限，不能增加会员权益；会话失效后需更新。项目不自动登录、处理验证码或轮换账号。
 
+`.env` 由 Node 的 `--env-file` 读取，整行作为值。不要用 `source .env` 或 `set -a; . .env` 加载：未加引号的 Cookie 含 `;`，shell 会在第一个分号处截断，上游会因会话不完整返回重定向或验证页（`UPSTREAM_BLOCKED`）。
+
 ## 已移除：企查查浏览器（CDP）模式
 
 早期版本可通过 `QCC_MODE=browser` 与 `QCC_CDP_URL` 连接本机 Chrome 调试端口查询企查查。该模式从未完成真实会话端到端验证，且 Cookie + HTTP 已通过多公司联网验证，现已删除。旧配置中的 `QCC_MODE`、`QCC_CDP_URL` 不再读取，可直接删除；企查查只需配置 `QCC_COOKIE`。

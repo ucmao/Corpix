@@ -1,0 +1,856 @@
+{
+  "date": "2026-11-19",
+  "method": "production buildApp /api/v1/lookup (strategy=all) with live upstream requests; env loaded via node --env-file. Only statuses, counts and cross-source agreement are recorded; field values and raw responses not persisted. basicNonNull counts non-empty basic.* fields.",
+  "records": [
+    {
+      "query": "杭州游科互动科技有限公司",
+      "http": 200,
+      "attempts": [
+        {
+          "source": "qichacha",
+          "status": "ok"
+        },
+        {
+          "source": "aiqicha",
+          "status": "ok"
+        },
+        {
+          "source": "tianyancha",
+          "status": "ok"
+        }
+      ],
+      "sources": {
+        "qichacha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 13,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 1,
+              "total": 1,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 6,
+              "total": 6,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        },
+        "aiqicha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 9,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 1,
+              "total": 1,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 6,
+              "total": 6,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 3,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 4,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "ok",
+              "returnedCount": 8,
+              "total": 8,
+              "complete": true
+            }
+          }
+        },
+        "tianyancha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 14,
+          "modules": {
+            "shareholders": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "people": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        }
+      },
+      "consistentFields": [
+        "name",
+        "creditCode",
+        "legalRepresentative",
+        "registeredCapital",
+        "establishedAt",
+        "address",
+        "basic.companyType",
+        "basic.industry",
+        "basic.registrationNumber",
+        "basic.organizationCode",
+        "basic.taxNumber",
+        "basic.paidInCapital",
+        "basic.registrationAuthority",
+        "basic.approvedAt",
+        "basic.insuredEmployees"
+      ],
+      "differingFields": [
+        "registrationStatus",
+        "basic.employeeScale"
+      ]
+    },
+    {
+      "query": "宇树科技股份有限公司",
+      "http": 200,
+      "attempts": [
+        {
+          "source": "qichacha",
+          "status": "ok"
+        },
+        {
+          "source": "aiqicha",
+          "status": "ok"
+        },
+        {
+          "source": "tianyancha",
+          "status": "ok"
+        }
+      ],
+      "sources": {
+        "qichacha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 14,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 39,
+              "total": 39,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 10,
+              "total": 10,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        },
+        "aiqicha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 10,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 10,
+              "total": 10,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 10,
+              "total": 10,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 10,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 106,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "ok",
+              "returnedCount": 10,
+              "total": 10,
+              "complete": true
+            }
+          }
+        },
+        "tianyancha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 15,
+          "modules": {
+            "shareholders": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "people": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        }
+      },
+      "consistentFields": [
+        "name",
+        "creditCode",
+        "legalRepresentative",
+        "registeredCapital",
+        "establishedAt",
+        "address",
+        "basic.companyType",
+        "basic.registrationNumber",
+        "basic.organizationCode",
+        "basic.taxNumber",
+        "basic.registrationAuthority",
+        "basic.approvedAt",
+        "basic.insuredEmployees"
+      ],
+      "differingFields": [
+        "registrationStatus",
+        "basic.industry",
+        "basic.paidInCapital",
+        "basic.employeeScale"
+      ]
+    },
+    {
+      "query": "杭州深度求索人工智能基础技术研究有限公司",
+      "http": 200,
+      "attempts": [
+        {
+          "source": "qichacha",
+          "status": "ok"
+        },
+        {
+          "source": "aiqicha",
+          "status": "ok"
+        },
+        {
+          "source": "tianyancha",
+          "status": "ok"
+        }
+      ],
+      "sources": {
+        "qichacha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 13,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 5,
+              "total": 5,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 3,
+              "total": 3,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        },
+        "aiqicha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 9,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 5,
+              "total": 5,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 3,
+              "total": 3,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 1,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 14,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "ok",
+              "returnedCount": 3,
+              "total": 3,
+              "complete": true
+            }
+          }
+        },
+        "tianyancha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 14,
+          "modules": {
+            "shareholders": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "people": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        }
+      },
+      "consistentFields": [
+        "name",
+        "creditCode",
+        "legalRepresentative",
+        "registeredCapital",
+        "establishedAt",
+        "address",
+        "basic.companyType",
+        "basic.industry",
+        "basic.registrationNumber",
+        "basic.organizationCode",
+        "basic.taxNumber",
+        "basic.paidInCapital",
+        "basic.registrationAuthority",
+        "basic.approvedAt",
+        "basic.insuredEmployees"
+      ],
+      "differingFields": [
+        "registrationStatus",
+        "basic.employeeScale"
+      ]
+    },
+    {
+      "query": "上海米哈游网络科技股份有限公司",
+      "http": 200,
+      "attempts": [
+        {
+          "source": "qichacha",
+          "status": "ok"
+        },
+        {
+          "source": "aiqicha",
+          "status": "ok"
+        },
+        {
+          "source": "tianyancha",
+          "status": "ok"
+        }
+      ],
+      "sources": {
+        "qichacha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 14,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 4,
+              "total": 4,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 8,
+              "total": 8,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        },
+        "aiqicha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 10,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 4,
+              "total": 4,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 8,
+              "total": 8,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 34,
+              "complete": null
+            },
+            "branches": {
+              "status": "ok",
+              "returnedCount": 0,
+              "total": 0,
+              "complete": true
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 73,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "partial",
+              "returnedCount": 10,
+              "total": 11,
+              "complete": false
+            }
+          }
+        },
+        "tianyancha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 15,
+          "modules": {
+            "shareholders": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "people": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        }
+      },
+      "consistentFields": [
+        "name",
+        "creditCode",
+        "legalRepresentative",
+        "registeredCapital",
+        "establishedAt",
+        "address",
+        "basic.companyType",
+        "basic.industry",
+        "basic.registrationNumber",
+        "basic.organizationCode",
+        "basic.taxNumber",
+        "basic.registrationAuthority",
+        "basic.approvedAt",
+        "basic.employeeScale",
+        "basic.insuredEmployees"
+      ],
+      "differingFields": [
+        "registrationStatus",
+        "basic.paidInCapital"
+      ]
+    },
+    {
+      "query": "北京泡泡玛特文化创意有限公司",
+      "http": 200,
+      "attempts": [
+        {
+          "source": "qichacha",
+          "status": "ok"
+        },
+        {
+          "source": "aiqicha",
+          "status": "ok"
+        },
+        {
+          "source": "tianyancha",
+          "status": "ok"
+        }
+      ],
+      "sources": {
+        "qichacha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 14,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 1,
+              "total": 1,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 10,
+              "total": 10,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 104,
+              "complete": null
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        },
+        "aiqicha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 10,
+          "modules": {
+            "shareholders": {
+              "status": "ok",
+              "returnedCount": 1,
+              "total": 1,
+              "complete": true
+            },
+            "people": {
+              "status": "ok",
+              "returnedCount": 10,
+              "total": 10,
+              "complete": true
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 36,
+              "complete": null
+            },
+            "branches": {
+              "status": "partial",
+              "returnedCount": 10,
+              "total": 104,
+              "complete": false
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": 57,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "partial",
+              "returnedCount": 10,
+              "total": 13,
+              "complete": false
+            }
+          }
+        },
+        "tianyancha": {
+          "exactName": true,
+          "hasCreditCode": true,
+          "basicNonNull": 15,
+          "modules": {
+            "shareholders": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "people": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "investments": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "branches": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "changes": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            },
+            "annualReports": {
+              "status": "not_returned",
+              "returnedCount": 0,
+              "total": null,
+              "complete": null
+            }
+          }
+        }
+      },
+      "consistentFields": [
+        "name",
+        "creditCode",
+        "legalRepresentative",
+        "registeredCapital",
+        "establishedAt",
+        "address",
+        "basic.companyType",
+        "basic.industry",
+        "basic.registrationNumber",
+        "basic.organizationCode",
+        "basic.taxNumber",
+        "basic.paidInCapital",
+        "basic.registrationAuthority",
+        "basic.approvedAt",
+        "basic.insuredEmployees"
+      ],
+      "differingFields": [
+        "registrationStatus",
+        "basic.employeeScale"
+      ]
+    }
+  ]
+}
