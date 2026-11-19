@@ -1,0 +1,17 @@
+services:
+  corpix:
+    build: .
+    ports:
+      - "127.0.0.1:3010:3010"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 3010
+      API_KEY: ${API_KEY:?请在 .env 中设置 API_KEY}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-30}
+      UPSTREAM_TIMEOUT_MS: ${UPSTREAM_TIMEOUT_MS:-20000}
+      TYC_COOKIE: ${TYC_COOKIE:-}
+      AQC_COOKIE: ${AQC_COOKIE:-}
+      QCC_MODE: http
+      QCC_COOKIE: ${QCC_COOKIE:-}
+    init: true
+    restart: unless-stopped

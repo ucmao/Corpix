@@ -1,0 +1,698 @@
+{
+  "date": "2026-11-19",
+  "method": "production buildApp API injection with live upstream requests; no raw responses persisted",
+  "records": [
+    {
+      "query": "福州科莱特科技有限公司",
+      "source": "tianyancha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "people": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 0,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "福州科莱特科技有限公司",
+      "source": "qichacha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 5,
+          "total": 5,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 2,
+          "total": 2,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "ok",
+          "returnedCount": 0,
+          "total": 0,
+          "complete": true
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 5,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "福州科莱特科技有限公司",
+      "source": "aiqicha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 5,
+          "total": 5,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 2,
+          "total": 2,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 5,
+          "complete": null
+        },
+        "branches": {
+          "status": "ok",
+          "returnedCount": 0,
+          "total": 0,
+          "complete": true
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 32,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "ok",
+          "returnedCount": 5,
+          "total": 5,
+          "complete": true
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 5,
+        "capitalParsed": 5
+      },
+      "secondsDateHandled": true,
+      "limitFlags": {
+        "changeRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 32
+        },
+        "investRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 5
+        },
+        "holdsData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 5
+        }
+      }
+    },
+    {
+      "query": "深圳市腾讯计算机系统有限公司",
+      "source": "tianyancha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "people": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 0,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "深圳市腾讯计算机系统有限公司",
+      "source": "qichacha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 4,
+          "total": 4,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 7,
+          "total": 7,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 13,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 4,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "深圳市腾讯计算机系统有限公司",
+      "source": "aiqicha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 4,
+          "total": 4,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 7,
+          "total": 7,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 41,
+          "complete": null
+        },
+        "branches": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 12,
+          "complete": false
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 53,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 12,
+          "complete": false
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 4,
+        "capitalParsed": 4
+      },
+      "secondsDateHandled": true,
+      "limitFlags": {
+        "changeRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 53
+        },
+        "investRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 41
+        },
+        "holdsData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 30
+        }
+      }
+    },
+    {
+      "query": "杭州海康威视数字技术股份有限公司",
+      "source": "tianyancha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "people": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 0,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "杭州海康威视数字技术股份有限公司",
+      "source": "qichacha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 5,
+          "total": 5,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 19,
+          "total": 19,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 42,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 0,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "杭州海康威视数字技术股份有限公司",
+      "source": "aiqicha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 10,
+          "total": 10,
+          "complete": true
+        },
+        "people": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 19,
+          "complete": false
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 70,
+          "complete": null
+        },
+        "branches": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 42,
+          "complete": false
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 97,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 13,
+          "complete": false
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 10,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true,
+      "limitFlags": {
+        "changeRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 97
+        },
+        "investRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 70
+        },
+        "holdsData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 90
+        }
+      }
+    },
+    {
+      "query": "北京科莱特信息技术有限公司",
+      "source": "tianyancha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "people": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 0,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "北京科莱特信息技术有限公司",
+      "source": "qichacha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 3,
+          "total": 3,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 2,
+          "total": 2,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "branches": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 13,
+          "complete": null
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": null,
+          "complete": null
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 3,
+        "capitalParsed": 0
+      },
+      "secondsDateHandled": true
+    },
+    {
+      "query": "北京科莱特信息技术有限公司",
+      "source": "aiqicha",
+      "searchHttp": 200,
+      "exactMatch": true,
+      "detailHttp": 200,
+      "identityMatched": true,
+      "basicFieldCount": 15,
+      "modules": {
+        "shareholders": {
+          "status": "ok",
+          "returnedCount": 3,
+          "total": 3,
+          "complete": true
+        },
+        "people": {
+          "status": "ok",
+          "returnedCount": 2,
+          "total": 2,
+          "complete": true
+        },
+        "investments": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 0,
+          "complete": null
+        },
+        "branches": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 14,
+          "complete": false
+        },
+        "changes": {
+          "status": "not_returned",
+          "returnedCount": 0,
+          "total": 16,
+          "complete": null
+        },
+        "annualReports": {
+          "status": "partial",
+          "returnedCount": 10,
+          "total": 12,
+          "complete": false
+        }
+      },
+      "shareholderMapping": {
+        "ratiosParsed": 3,
+        "capitalParsed": 3
+      },
+      "secondsDateHandled": true,
+      "limitFlags": {
+        "changeRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 16
+        },
+        "investRecordData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 0
+        },
+        "holdsData": {
+          "limitStatus": "2",
+          "listLength": 0,
+          "total": 0
+        }
+      }
+    }
+  ]
+}

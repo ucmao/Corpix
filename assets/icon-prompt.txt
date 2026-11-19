@@ -1,0 +1,10 @@
+Use case: logo-brand
+Asset type: Corpix project icon, square master artwork for README and favicon.
+Primary request: Create a polished, highly legible icon for Corpix, a multi-platform company information search and normalization engine.
+Input image 1 is STYLE REFERENCE ONLY: match its friendly flat vector-like visual language, thick rounded dark navy outlines, electric azure blue, white, tiny coral orange accent, carefully balanced compact silhouette. Do not copy the camera or document subject.
+Subject: a single chunky rounded corporate office building with a simple stepped roofline and four large window shapes, overlapped at lower right by one bold magnifying glass. The lens is white/light blue and its short handle points down right. One coral accent window or lens dot adds warmth. Strong unified silhouette.
+Composition: one centered standalone icon, occupies about 82% of a square canvas, equal safe margins, front-facing, no perspective, no surrounding tile.
+Style: premium crisp flat app icon, smooth rounded joins, very thick consistent navy strokes, solid colors, minimal details that survive reduction to 16px.
+Color palette: dark navy #0C2448 outlines, bright azure #24A5F5, white #FFFFFF, coral #FF6348 accent.
+Background: genuinely transparent.
+Constraints: ONLY ONE icon, no typography, no letters, no captions, no presentation sheet, no border, no watermark, no shadows, no gradients, no texture. All building and glass forms solid opaque; transparent background only.
