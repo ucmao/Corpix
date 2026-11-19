@@ -30,13 +30,13 @@ export function decodeDdw(value: unknown, mode: number): unknown {
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([k,v]) => [k,decodeDdw(v,mode)]));
   return value;
 }
-export function normalizeAqc(value: unknown, id: string, allData?: unknown, detail = true): Company {
+function normalizeAqc(value: unknown, id: string, allData: unknown, detail = true): Company {
   const p = object(value), name = text(p.entName);
   if (!name) fail('PARSE_ERROR', '爱企查企业名称缺失');
   return { source: 'aiqicha', id, name, creditCode: text(p.unifiedCode), legalRepresentative: text(p.legalPerson),
     registrationStatus: text(p.openStatus), registeredCapital: text(p.regCapital), establishedAt: date(p.startDate),
     address: text(p.regAddr), businessScope: text(p.scope), sourceUrl: `${BASE}/company_detail_${id}`,
-    basic: basicDetails('aiqicha', p), modules: companyModules('aiqicha', allData ?? {}, detail) };
+    basic: basicDetails('aiqicha', p), modules: companyModules('aiqicha', allData, detail) };
 }
 export class Aiqicha implements Provider {
   readonly source = 'aiqicha' as const;

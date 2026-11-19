@@ -84,7 +84,7 @@ curl http://127.0.0.1:3010/api/v1/sources
 在 `.env` 中按需填写：
 
 ```dotenv
-# 企查查登录会话（HTTP 请求，无需启动浏览器）
+# 企查查登录会话
 QCC_COOKIE=your-qcc-cookie
 
 # 爱企查登录会话

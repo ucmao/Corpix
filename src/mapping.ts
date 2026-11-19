@@ -28,10 +28,10 @@ export const basicFieldMappings = {
 
 // 爱企查等平台用 "-"、"**" 等纯符号占位表示未公示或无权限，不能当作真实值。
 // 只匹配整串都是占位符号的情况，"0755-2878****" 这类部分掩码原文仍保留。
-export function placeholder(value: unknown): boolean {
+function placeholder(value: unknown): boolean {
   return typeof value === 'string' && /^[\s\-—–*＊/]+$/.test(value);
 }
-export function at(value: unknown, path: string): unknown {
+function at(value: unknown, path: string): unknown {
   return path.split('.').reduce<unknown>((v, key) => object(v)[key], value);
 }
 export function first(value: unknown, paths: readonly string[]): unknown {

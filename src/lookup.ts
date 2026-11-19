@@ -22,7 +22,7 @@ export interface LookupResult {
 }
 
 const CREDIT_CODE = /^[0-9A-HJ-NPQRTUWXY]{2}\d{6}[0-9A-HJ-NPQRTUWXY]{10}$/;
-export const isCreditCode = (value: string) => CREDIT_CODE.test(value.toUpperCase());
+const isCreditCode = (value: string) => CREDIT_CODE.test(value.toUpperCase());
 // 只用于判断是否同名：统一全角/半角括号并去掉空白，不改动返回值。
 const sameName = (a: string, b: string) => {
   const canon = (s: string) => s.replace(/（/g, '(').replace(/）/g, ')').replace(/\s+/g, '');

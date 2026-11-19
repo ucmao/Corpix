@@ -1,7 +1,0 @@
-Mode: built-in image_gen edit. Source: assets/alternatives/corpix-window-lens.png
-
-Use case: precise-object-edit
-Edit ONLY the circular LENS INTERIOR of this exact Corpix logo.
-Remove all four blue square window panes inside the magnifying glass. Replace the whole lens interior with a clean abstract frosted-glass fill: a very subtle smooth pale ice-blue to almost-white gradient, near-white at the upper left transitioning to soft pale blue at the lower right. Suggested color range #FAFDFF to #D7EDFA. The gradient must be quiet, luminous but not glowing, clean and restrained, with no visible banding. NO concrete objects or symbols inside the lens: no windows, no grid, no buildings, no text, no icons, no hard highlight stripe. Just a simple soft light-colored glass surface.
-Preserve EVERYTHING ELSE exactly: the three blue office towers, all existing white square windows OUTSIDE the lens, coral rooftop strip, thick navy outlines, magnifying glass size, circular rim, handle, placement, overall silhouette, canvas and margins. Do not simplify or redesign the buildings. No extra shadows, no sparkles, no glow, no 3D effects.
-Preserve genuine transparent background outside the logo silhouette. Lens interior must stay fully opaque and pale. Output only one edited icon.

@@ -1,8 +1,0 @@
-Mode: built-in image_gen edit. Source: square-window building logo with large empty lens.
-
-Use case: precise-object-edit
-Edit ONLY THE INTERIOR OF THE LARGE MAGNIFYING GLASS in this exact Corpix company-search logo.
-The user approved adding magnified blue window panes inside the lens to communicate seeing company information clearly.
-Replace the blank white lens interior with a very pale flat icy blue #EAF6FF surface. Place FOUR enlarged azure blue SQUARE WINDOW PANES inside the lens in a clean 2 by 2 arrangement, precisely aligned with equal white/pale-blue gaps. Each pane should be about 24% of the lens interior diameter. They should look like a close-up of the same architectural window grid behind the lens, magnified about 1.5 times the outside windows. Keep plenty of pale blue breathing room within the circle, no panes touching the navy ring. Perfectly upright, truly square geometry with straight sides. Treat this as a simplified magnified detail of the building, not a separate floating app icon. Keep the effect subtle and graphic.
-IMPORTANT: change nothing outside the lens interior. Preserve the exact three office towers, their existing white square window arrangement and sizes, azure building bodies, coral rooftop strip, navy thick outline, LARGE magnifying circle position and dimensions, short navy handle, layout, framing and transparent background. No additional changes or redesign.
-NO glow, NO sparkle, NO shine streak, NO complex reflections, NO extra mini-building in lens, NO gradient, NO shadows, NO typography. Flat vector-like logo. All lens pixels inside the navy ring must be opaque, background outside the silhouette genuinely transparent. Output one edited icon only.

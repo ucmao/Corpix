@@ -8,12 +8,13 @@ export function tycHeaders(raw: string): Record<string, string> {
     origin: 'https://www.tianyancha.com', referer: 'https://www.tianyancha.com/' };
   if (raw) headers.cookie = raw;
   const cookie = Object.fromEntries(raw.split(';').map(s => { const i = s.indexOf('='); return i < 0 ? ['', ''] : [s.slice(0,i).trim(),s.slice(i+1).trim()]; }));
-  for (const [key, header] of [['auth_token','X-AUTH-TOKEN'],['X-TOKEN-4C','X-TOKEN'],['TYCID','X-TYCID']]) {
-    if (key && header && cookie[key]) headers[header] = cookie[key]!;
+  for (const [key, header] of [['auth_token','X-AUTH-TOKEN'],['X-TOKEN-4C','X-TOKEN'],['TYCID','X-TYCID']] as const) {
+    const value = cookie[key];
+    if (value) headers[header] = value;
   }
   return headers;
 }
-export function normalizeTyc(value: unknown, detail = false): Company {
+function normalizeTyc(value: unknown, detail = false): Company {
   const p = object(value), id = text(p.id), name = text(p.name);
   if (!id || !name) fail('PARSE_ERROR', '天眼查企业标识或名称缺失');
   return { source: 'tianyancha', id, name, creditCode: text(p.creditCode), legalRepresentative: text(p.legalPersonName),
