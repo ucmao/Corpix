@@ -4,6 +4,7 @@ import { HttpClient, businessError, readBody, MAX_BODY_BYTES } from '../src/http
 import { Tianyancha, tycHeaders } from '../src/providers/tianyancha.js';
 import { Aiqicha, decodeDdw } from '../src/providers/aiqicha.js';
 import { Qichacha, signQcc } from '../src/providers/qichacha.js';
+import { Shuidi, parseShuidiCards } from '../src/providers/shuidi.js';
 import { CorpixError } from '../src/errors.js';
 const code = (expected: string) => (e: unknown) => e instanceof CorpixError && e.code === expected;
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
@@ -107,4 +108,122 @@ test('HTTP 层处理超时、验证页、限流和超大响应，错误不暴露
   await assert.rejects(readBody(new Response('x'.repeat(MAX_BODY_BYTES + 1))), code('PARSE_ERROR'));
   assert.throws(() => businessError({ msg: '会员权限不足' }), code('ACCESS_DENIED'));
   assert.throws(() => businessError({ message: '请求过于频繁' }), code('RATE_LIMITED'));
+});
+
+test('水滴信用搜索解析卡片、分页及高亮标签去除，未命中返回空列表', async () => {
+  const html = `
+    <div class="sd_company_container">
+      <div class="or_search_row or_row_w">
+        <div class="or_look_tit">
+          <span class="or_look_ne"><em>示例</em><em>科技</em><em>有限</em><em>公司</em> <a href="" companyname="示例科技有限公司"></a></span>
+          <a href="/suppinfo?digest=60d384ed1970fb41b06dd0099355183f"></a>
+        </div>
+        <div class="or-company-all">
+          <div class="or_search_row_company">
+            <span>法定代表人：张三 </span><i>|</i>
+            <span>注册资本：1000万人民币 </span><i>|</i>
+            <span>注册时间：2020-01-01</span><i>|</i>
+            <span>状态：存续（在营、开业、在册）</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pagination"><div class="page"><p><i>（共15条记录）</i></p></div></div>
+  `;
+  const parsed = parseShuidiCards(html);
+  assert.equal(parsed.total, 15);
+  assert.equal(parsed.companies.length, 1);
+  assert.equal(parsed.companies[0]?.name, '示例科技有限公司');
+  assert.equal(parsed.companies[0]?.id, '60d384ed1970fb41b06dd0099355183f');
+  assert.equal(parsed.companies[0]?.legalRepresentative, '张三');
+  assert.equal(parsed.companies[0]?.registeredCapital, '1000万人民币');
+
+  const emptyHtml = '<div class="or_look_none"><p>未找到符合条件的查询结果，请更改关键词重新查询！</p></div>';
+  const emptyParsed = parseShuidiCards(emptyHtml);
+  assert.equal(emptyParsed.total, 0);
+  assert.equal(emptyParsed.companies.length, 0);
+
+  const http = new HttpClient(1000, async (url, init) => {
+    assert.ok(String(url).includes('/b-search?key=%E7%A4%BA%E4%BE%8B&page=1'));
+    assert.equal(new Headers(init?.headers).get('referer'), 'https://shuidi.cn/b-search');
+    assert.equal(new Headers(init?.headers).get('cookie'), 'guid=test-guid');
+    return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
+  });
+  const provider = new Shuidi(http, 'guid=test-guid');
+  const res = await provider.search({ keyword: '示例', page: 1, pageSize: 10 });
+  assert.equal(res.companies.length, 1);
+  assert.equal(res.pagination?.total, 15);
+});
+
+test('水滴信用详情聚合工商、股东、高管、分支及年报，无效 ID 报错', async () => {
+  const digest = '60d384ed1970fb41b06dd0099355183f';
+  const http = new HttpClient(1000, async (url) => {
+    const u = String(url);
+    if (u.includes('/webapp/company/base-info?action=branches')) {
+      return json({ status: 0, total: 1, data: [{ branch_name: '示例分公司', digest: '12345678901234567890123456789012', company_status: '存续' }] });
+    }
+    if (u.includes('/annual-reports?action=get_all_year')) {
+      return json({ status: 0, total: 1, data: [{ x: 2024, y: '2025年05月01日' }] });
+    }
+    if (u.includes('/phone-new') && u.includes('type=1')) {
+      return json({ status: 0, data: { list: [{ phone: '010-8888****' }] } });
+    }
+    if (u.includes('/phone-new') && u.includes('type=2')) {
+      return json({ status: 0, data: { list: [{ email: 'info@example.com' }] } });
+    }
+    if (u.includes('/webapp/company/base-info')) {
+      return json({
+        status: 0,
+        data: {
+          company_name: '示例企业',
+          credit_no: '91350000000000000X',
+          legal_person: '示例法人',
+          establish_date: '2020-01-01',
+          company_status: '存续',
+          capital: '1000万人民币',
+          real_capital: '500万人民币',
+          company_type: '有限责任公司',
+          authority: '市场监督管理局',
+          partners: {
+            total: 1,
+            data: [{ stock: { stock_name: '控股股东', digest: 'a'.repeat(32) }, stock_proportion: '100%', stock_type: '企业法人' }]
+          },
+          employees: {
+            total: 1,
+            data: [{ employee_name: '李四', position: '执行董事,总经理' }]
+          },
+          changes: {
+            total: 1,
+            data: [{ change_date: '2023-01-01', change_type: '名称变更', content_before: '旧名称', content_after: '新名称' }]
+          }
+        }
+      });
+    }
+    return json({ status: 0 });
+  });
+
+  const provider = new Shuidi(http);
+  await assert.rejects(provider.detail('invalid-id'), code('INVALID_INPUT'));
+
+  const res = await provider.detail(digest);
+  const c = res.companies[0]!;
+  assert.equal(c.name, '示例企业');
+  assert.equal(c.creditCode, '91350000000000000X');
+  assert.equal(c.legalRepresentative, '示例法人');
+  assert.equal(c.basic?.paidInCapital, '500万人民币');
+  assert.deepEqual(c.basic?.phones, ['010-8888****']);
+  assert.deepEqual(c.basic?.emails, ['info@example.com']);
+  assert.equal(c.modules?.shareholders.items.length, 1);
+  assert.equal(c.modules?.shareholders.items[0]?.name, '控股股东');
+  assert.equal(c.modules?.people.items.length, 1);
+  assert.deepEqual(c.modules?.people.items[0]?.positions, ['执行董事', '总经理']);
+  assert.equal(c.modules?.branches.items.length, 1);
+  assert.equal(c.modules?.branches.items[0]?.name, '示例分公司');
+  assert.equal(c.modules?.annualReports.items.length, 1);
+  assert.equal(c.modules?.annualReports.items[0]?.year, '2024');
+  assert.equal(c.modules?.changes.items.length, 1);
+  assert.equal(c.modules?.changes.items[0]?.item, '名称变更');
+
+  const notFoundHttp = new HttpClient(1000, async () => json({ status: 0, data: { company_name: null } }));
+  await assert.rejects(new Shuidi(notFoundHttp).detail(digest), code('NOT_FOUND'));
 });

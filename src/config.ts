@@ -1,7 +1,7 @@
 import { fail } from './errors.js';
 export interface Config {
   host: string; port: number; apiKey: string; rateLimit: number; timeoutMs: number;
-  tycCookie: string; aqcCookie: string; qccCookie: string;
+  tycCookie: string; aqcCookie: string; qccCookie: string; shuidiCookie: string;
 }
 function integer(name: string, value: string | undefined, fallback: number, min: number, max: number): number {
   const n = value === undefined || value === '' ? fallback : Number(value);
@@ -17,5 +17,5 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return { host, apiKey, port: integer('PORT', env.PORT, 3010, 1, 65535),
     rateLimit: integer('RATE_LIMIT_PER_MINUTE', env.RATE_LIMIT_PER_MINUTE, 30, 1, 10000),
     timeoutMs: integer('UPSTREAM_TIMEOUT_MS', env.UPSTREAM_TIMEOUT_MS, 20000, 100, 120000),
-    tycCookie: env.TYC_COOKIE || '', aqcCookie: env.AQC_COOKIE || '', qccCookie: env.QCC_COOKIE || '' };
+    tycCookie: env.TYC_COOKIE || '', aqcCookie: env.AQC_COOKIE || '', qccCookie: env.QCC_COOKIE || '', shuidiCookie: env.SHUIDI_COOKIE || '' };
 }

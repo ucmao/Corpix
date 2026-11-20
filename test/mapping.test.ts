@@ -171,3 +171,85 @@ test('工商日期统一为中国本地日历日，字符串日期规范化，�
   assert.equal(date('2000/01/05 00:00:00'), '2000-01-05');
   assert.equal(date('无固定期限'), '无固定期限');
 });
+
+test('水滴信用基础字段映射与模块结构归一化', () => {
+  const raw = {
+    company_type: '有限责任公司',
+    industry_l2_name: '软件和信息技术服务业',
+    company_no: '350100100297273',
+    org_code: '060354249',
+    credit_no: '91350102060354249H',
+    real_capital: '3074.4739万人民币',
+    authority: '福州市市场监督管理局',
+    issue_date: '2023-10-25',
+    operation_date: '2012-12-14 至 无固定期限',
+    employee_no: '100-499人',
+    insurance_amount: '148人',
+    history_names: ['曾用名一', '曾用名二'],
+    phones: ['0591-8861****'],
+    emails: ['info@example.com'],
+    websites: ['https://example.com']
+  };
+  const basic = basicDetails('shuidi', raw);
+  assert.equal(basic.companyType, '有限责任公司');
+  assert.equal(basic.industry, '软件和信息技术服务业');
+  assert.equal(basic.registrationNumber, '350100100297273');
+  assert.equal(basic.organizationCode, '060354249');
+  assert.equal(basic.paidInCapital, '3074.4739万人民币');
+  assert.equal(basic.registrationAuthority, '福州市市场监督管理局');
+  assert.equal(basic.approvedAt, '2023-10-25');
+  assert.equal(basic.businessTerm, '2012-12-14 至 无固定期限');
+  assert.equal(basic.employeeScale, '100-499人');
+  assert.equal(basic.insuredEmployees, '148人');
+  assert.deepEqual(basic.formerNames, ['曾用名一', '曾用名二']);
+  assert.deepEqual(basic.phones, ['0591-8861****']);
+  assert.deepEqual(basic.emails, ['info@example.com']);
+  assert.deepEqual(basic.websites, ['https://example.com']);
+
+  const modules = companyModules('shuidi', {
+    partners: {
+      total: 1,
+      data: [{
+        stock: { stock_name: '张三', digest: '123' },
+        stock_proportion: '60%',
+        pays: [{ stock_capital: 600, stock_unit: '万元', stock_date: '2020-01-01' }],
+        stock_type: '自然人股东'
+      }]
+    },
+    employees: {
+      total: 1,
+      data: [{ employee_name: '李四', position: '总经理,执行董事' }]
+    },
+    branches: {
+      total: 1,
+      data: [{ branch_name: '某某分公司', digest: '456', company_status: '存续', legal_person: '王五' }]
+    },
+    annualReports: {
+      total: 1,
+      data: [{ x: 2024, y: '2025年05月01日' }]
+    },
+    changes: {
+      total: 1,
+      data: [{ change_date: '2022-01-01', change_type: '地址变更', content_before: '旧地址', content_after: '新地址' }]
+    }
+  }, true);
+
+  assert.equal(modules.shareholders.status, 'ok');
+  assert.equal(modules.shareholders.items[0]?.name, '张三');
+  assert.equal(modules.shareholders.items[0]?.ownershipRatio, 0.6);
+  assert.equal(modules.shareholders.items[0]?.subscribedCapital?.amount, '600');
+  assert.equal(modules.shareholders.items[0]?.subscribedCapital?.unit, '万');
+
+  assert.equal(modules.people.status, 'ok');
+  assert.deepEqual(modules.people.items[0]?.positions, ['总经理', '执行董事']);
+
+  assert.equal(modules.branches.status, 'ok');
+  assert.equal(modules.branches.items[0]?.name, '某某分公司');
+  assert.equal(modules.branches.items[0]?.legalRepresentative, '王五');
+
+  assert.equal(modules.annualReports.status, 'ok');
+  assert.equal(modules.annualReports.items[0]?.year, '2024');
+
+  assert.equal(modules.changes.status, 'ok');
+  assert.equal(modules.changes.items[0]?.item, '地址变更');
+});

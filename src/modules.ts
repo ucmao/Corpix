@@ -1,4 +1,4 @@
-import { object, text, total, type Source, type CompanyModules, type DataModule, type ModuleStatus,
+import { object, text, date, total, type Source, type CompanyModules, type DataModule, type ModuleStatus,
   type Shareholder, type Person, type RelatedCompany, type ChangeRecord, type AnnualReport } from './types.js';
 import { first, money, qccDate, ratio, stringList } from './mapping.js';
 
@@ -20,7 +20,21 @@ function moduleOf<T>(value: unknown, count: unknown, convert: (v: unknown) => T 
   return { status: complete ? 'ok' : 'partial', items, total: expected, returnedCount: items.length, complete };
 }
 function shareholder(source: Source, v: unknown): Shareholder | null {
-  const p = object(v), qcc = source === 'qichacha';
+  const p = object(v);
+  if (source === 'shuidi') {
+    const stock = object(p.stock);
+    const name = text(stock.stock_name ?? p.name);
+    if (!name) return null;
+    const rawRatio = text(p.stock_proportion ?? p.ownershipRatioText);
+    const pays = Array.isArray(p.pays) ? p.pays : [];
+    const firstPay = object(pays[0]);
+    const subMoney = firstPay.stock_capital ? `${firstPay.stock_capital}${firstPay.stock_unit ?? '万元'}` : (p.stock_capital_num ? `${p.stock_capital_num}万元` : p.subMoney);
+    const realMoney = p.stock_realcapital_num && p.stock_realcapital_num !== '-' ? p.stock_realcapital_num : p.realMoney;
+    return { id: text(stock.digest ?? p.id), name, ownershipRatio: ratio(rawRatio), ownershipRatioText: rawRatio,
+      subscribedCapital: money(subMoney), paidInCapital: money(realMoney),
+      subscribedAt: date(firstPay.stock_date ?? p.stock_date ?? p.subscribedAt), kind: text(p.stock_type ?? p.kind) };
+  }
+  const qcc = source === 'qichacha';
   const name = text(qcc ? p.StockName : p.name);
   if (!name) return null;
   const rawRatio = qcc ? p.StockPercent : p.subRate;
@@ -33,23 +47,40 @@ function positions(value: unknown): string[] {
   return [...new Set(stringList(value).flatMap(v => v.split(/[,，、;；/]/)).map(v => v.trim()).filter(Boolean))];
 }
 function person(source: Source, v: unknown): Person | null {
-  const p = object(v), name = text(source === 'qichacha' ? p.Name : p.name);
-  return name ? { id: text(source === 'qichacha' ? p.KeyNo : p.personId), name,
-    positions: positions(source === 'qichacha' ? p.Job : p.title) } : null;
+  const p = object(v);
+  const name = text(source === 'qichacha' ? p.Name : source === 'shuidi' ? p.employee_name ?? p.name : p.name);
+  return name ? { id: text(source === 'qichacha' ? p.KeyNo : source === 'shuidi' ? p.name_id ?? p.id : p.personId), name,
+    positions: positions(source === 'qichacha' ? p.Job : source === 'shuidi' ? p.position : p.title) } : null;
 }
 function related(source: Source, v: unknown): RelatedCompany | null {
-  const p = object(v), qcc = source === 'qichacha', name = text(qcc ? p.Name : p.entName);
+  const p = object(v);
+  if (source === 'shuidi') {
+    const name = text(p.branch_name ?? p.company_name ?? p.name);
+    return name ? { id: text(p.digest ?? p.id), name, status: text(p.company_status ?? p.status),
+      legalRepresentative: text(p.legal_person ?? p.legalRepresentative), ownershipRatio: ratio(p.ownershipRatio) } : null;
+  }
+  const qcc = source === 'qichacha', name = text(qcc ? p.Name : p.entName);
   return name ? { id: text(qcc ? p.KeyNo : p.pid), name, status: text(qcc ? p.Status : p.openStatus),
     legalRepresentative: text(qcc ? p.OperName : p.legalPerson), ownershipRatio: ratio(qcc ? p.StockPercent : p.subRate) } : null;
 }
 function annual(v: unknown): AnnualReport | null {
-  const p = object(v), title = text(p.name);
+  const p = object(v);
+  if (p.x !== undefined) {
+    const year = String(p.x);
+    return { year, title: `${year}年度报告`, url: null };
+  }
+  const title = text(p.name ?? p.title);
   if (!title) return null;
   let url: string | null = null;
   if (typeof p.link === 'string') {
     try { const parsed = new URL(p.link, 'https://aiqicha.baidu.com'); if (parsed.origin === 'https://aiqicha.baidu.com' && !parsed.username && !parsed.password) url = parsed.href; } catch { /* 无效链接不传播 */ }
   }
   return { year: title.match(/(?:19|20)\d{2}/)?.[0] ?? null, title, url };
+}
+function changeRecord(v: unknown): ChangeRecord | null {
+  const p = object(v);
+  return { changedAt: date(p.change_date ?? p.changedAt), item: text(p.change_type ?? p.change_field ?? p.item),
+    before: text(p.content_before ?? p.before), after: text(p.content_after ?? p.after) };
 }
 export function companyModules(source: Source, raw: unknown, detail: boolean): CompanyModules {
   const notRequested = <T>() => missing<T>('not_requested', '搜索结果不加载此模块');
@@ -63,6 +94,16 @@ export function companyModules(source: Source, raw: unknown, detail: boolean): C
     result.shareholders = moduleOf(p.Partners, counts.PartnersCount, v => shareholder(source, v));
     result.people = moduleOf(p.Employees, counts.EmployeesCount, v => person(source, v));
     result.branches = moduleOf(p.Branches, counts.BranchCount, v => related(source, v));
+    return result;
+  }
+  if (source === 'shuidi') {
+    const partners = object(p.partners), employees = object(p.employees);
+    const branches = object(p.branches), annualReports = object(p.annualReports), changes = object(p.changes);
+    result.shareholders = moduleOf(partners.data ?? p.partnersList, partners.total ?? p.partnersCount, v => shareholder(source, v));
+    result.people = moduleOf(employees.data ?? p.employeesList, employees.total ?? p.employeesCount, v => person(source, v));
+    result.branches = moduleOf(branches.data ?? p.branchesList, branches.total ?? p.branchesCount, v => related(source, v));
+    result.annualReports = moduleOf(annualReports.data ?? p.annualReportsList, annualReports.total ?? p.annualReportsCount, annual);
+    result.changes = moduleOf(changes.data ?? p.changesList, changes.total ?? p.changesCount, changeRecord);
     return result;
   }
   const block = <T>(key: string, mapper: (v: unknown) => T | null): DataModule<T> => {

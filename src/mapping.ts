@@ -23,6 +23,13 @@ export const basicFieldMappings = {
     registrationAuthority: ['authority'], approvedAt: ['annualDate'], businessTerm: ['openTime'],
     employeeScale: ['scale'], insuredEmployees: ['insuranceInfo.insuranceNum'], formerNames: ['prevEntName'],
     phones: ['telephone', 'phoneinfo'], emails: ['email', 'emailinfo'], websites: ['officialweb', 'website']
+  },
+  shuidi: {
+    companyType: ['company_type'], industry: ['industry_l2_name', 'industry_name'], registrationNumber: ['company_no'],
+    organizationCode: ['org_code'], taxNumber: ['tax_number', 'credit_no'], paidInCapital: ['real_capital'],
+    registrationAuthority: ['authority'], approvedAt: ['issue_date'], businessTerm: ['operation_date'],
+    employeeScale: ['employee_no'], insuredEmployees: ['insurance_amount'], formerNames: ['history_names'],
+    phones: ['phoneList', 'phones'], emails: ['emailList', 'emails'], websites: ['websiteList', 'websites']
   }
 } satisfies Record<Source, Record<keyof BasicDetails, string[]>>;
 

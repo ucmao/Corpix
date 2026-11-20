@@ -86,13 +86,13 @@ test('精确匹配：名称忽略全角半角括号，信用代码在详情阶�
 
 test('全部失败时返回统一错误格式并附每个平台的尝试记录', async t => {
   const err = () => new CorpixError('UPSTREAM_BLOCKED', '上游要求浏览器验证');
-  const failing = setup({ qichacha: { search: err() }, aiqicha: { search: [] }, tianyancha: { detail: err() } });
+  const failing = setup({ qichacha: { search: err() }, aiqicha: { search: [] }, tianyancha: { detail: err() }, shuidi: { search: err() } });
   const app = await buildApp(failing.options); t.after(() => app.close());
   const r = await app.inject(post({ keyword: NAME }));
   assert.equal(r.statusCode, 502);
   assert.equal(r.json().error.code, 'UPSTREAM_ERROR');
-  assert.equal(r.json().attempts.length, 3);
-  const none = setup({ qichacha: { search: [] }, aiqicha: { search: [] }, tianyancha: { search: [] } });
+  assert.equal(r.json().attempts.length, 4);
+  const none = setup({ qichacha: { search: [] }, aiqicha: { search: [] }, tianyancha: { search: [] }, shuidi: { search: [] } });
   const app2 = await buildApp(none.options); t.after(() => app2.close());
   const nf = await app2.inject(post({ keyword: NAME, strategy: 'all' }));
   assert.equal(nf.statusCode, 404);
@@ -108,7 +108,8 @@ test('all 并行查询，按平台返回并对比字段，格式差异不算不�
   const { options } = setup({
     qichacha: { detail: company('qichacha', 'qichacha-1', { registeredCapital: '100万元', registrationStatus: '存续（在营、开业、在册）' }) },
     aiqicha: { search: new CorpixError('ACCESS_DENIED', '会员权限不足', 403) },
-    tianyancha: { detail: company('tianyancha', 'tianyancha-1', { address: null }) }
+    tianyancha: { detail: company('tianyancha', 'tianyancha-1', { address: null }) },
+    shuidi: { search: [] }
   });
   const app = await buildApp(options); t.after(() => app.close());
   const body = (await app.inject(post({ keyword: NAME, strategy: 'all' }))).json();

@@ -32,7 +32,7 @@ curl http://127.0.0.1:3010/api/v1/search \
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 | :--- | :--- | :---: | :--- | :--- |
-| `source` | `string` | 是 | — | `tianyancha` / `qichacha` / `aiqicha` |
+| `source` | `string` | 是 | — | `tianyancha` / `qichacha` / `aiqicha` / `shuidi` |
 | `keyword` | `string` | 是 | — | 1–100 字符，自动去除首尾空格 |
 | `page` | `number` | 否 | `1` | 整数，范围 1–100；实际分页权限由上游决定 |
 | `pageSize` | `number` | 否 | `20` | 整数，范围 1–20；上游可能截断返回数量 |
@@ -53,6 +53,7 @@ curl "http://127.0.0.1:3010/api/v1/companies/qichacha/${COMPANY_ID}?raw=false" \
 - 天眼查：数字企业 ID。
 - 企查查：32 位十六进制 `KeyNo`。
 - 爱企查：数字 `pid`，或可通过同源跳转解析的详情页 slug。
+- 水滴信用：32 位十六进制 `digest`。
 
 **不同平台的企业 ID 不可互换。** 单平台接口不合并跨平台结果，也不使用其他平台的数据补齐缺失值；需要兜底或对比时使用 [lookup](#跨平台统一查询lookup)。
 
@@ -71,7 +72,7 @@ curl http://127.0.0.1:3010/api/v1/lookup \
 | :--- | :--- | :---: | :--- | :--- |
 | `keyword` | `string` | 是 | — | 企业全称，或 18 位统一社会信用代码（自动识别） |
 | `strategy` | `string` | 否 | `fallback` | `fallback`：按顺序查，第一个成功即返回；`all`：并行查所有平台并对比字段 |
-| `sources` | `string[]` | 否 | `["qichacha","aiqicha","tianyancha"]` | 参与查询的平台及顺序，不可重复 |
+| `sources` | `string[]` | 否 | `["qichacha","aiqicha","tianyancha","shuidi"]` | 参与查询的平台及顺序，不可重复 |
 
 **用途：**
 

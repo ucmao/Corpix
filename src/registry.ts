@@ -4,6 +4,7 @@ import { sources, type Source, type Provider, type CompanyModules } from './type
 import { Tianyancha } from './providers/tianyancha.js';
 import { Aiqicha } from './providers/aiqicha.js';
 import { Qichacha } from './providers/qichacha.js';
+import { Shuidi } from './providers/shuidi.js';
 import { HttpQccTransport } from './qcc-http.js';
 
 type Availability = 'inline' | 'index' | 'not_returned';
@@ -27,6 +28,10 @@ export const sourceDefinitions: Record<Source, SourceDefinition> = {
   aiqicha: {
     create: (http, c) => new Aiqicha(http, c.aqcCookie), configured: c => Boolean(c.aqcCookie),
     liveVerified: () => true, modules: { ...absent, shareholders: 'inline', people: 'inline', branches: 'inline', annualReports: 'index' }
+  },
+  shuidi: {
+    create: (http, c) => new Shuidi(http, c.shuidiCookie), configured: () => true,
+    liveVerified: () => true, modules: { ...absent, shareholders: 'inline', people: 'inline', branches: 'inline', annualReports: 'index', changes: 'inline' }
   }
 };
 export function createProviders(http: HttpClient, config: Config): Record<Source, Provider> {

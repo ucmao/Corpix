@@ -13,23 +13,23 @@
 
 ## 工商扩展信息 basic
 
-| 统一字段 | 天眼查 | 企查查 | 爱企查 |
-| --- | --- | --- | --- |
-| `companyType` 企业类型 | companyOrgType | EconKind | entType / orgType |
-| `industry` 行业（国标） | industry2017 / industry | Industry.SubIndustry / Industry.Industry | industry |
-| `registrationNumber` 注册号 | regNumber | No | regCode / licenseNumber |
-| `organizationCode` 组织机构代码 | orgNumber | OrgNo | orgNo |
-| `taxNumber` 纳税识别号 | taxNumber / taxCode | TaxNo | taxNo |
-| `paidInCapital` 实缴资本 | actualCapital | RecCap | paidinCapital / realCapital |
-| `registrationAuthority` 登记机关 | regInstitute / registerInstitute | BelongOrg | authority |
-| `approvedAt` 核准日期 | approvedTime / approveDate | CheckDate（未出现则 null） | annualDate |
-| `businessTerm` 营业期限 | businessTerm 或 fromTime/toTime | TermStart/TeamEnd | openTime |
-| `employeeScale` 人员规模 | staffNumRange / companyScale | StaffScale / Scale | scale |
-| `insuredEmployees` 参保人数原文 | socialStaffNum | Staffs.c | insuranceInfo.insuranceNum |
-| `formerNames` 曾用名数组 | historyNames | OriginalName[].Name | prevEntName |
-| `phones` 电话数组 | phoneNumber / phone / phoneList | ContactInfo.PhoneNumber / ContactNumber / TelList | telephone / phoneinfo |
-| `emails` 邮箱数组 | emailList / email / emails | ContactInfo.Email / Email / EmailList | email / emailinfo |
-| `websites` 官网数组 | websiteList / websites | ContactInfo.WebSite[].Url / GW | officialweb / website |
+| 统一字段 | 天眼查 | 企查查 | 爱企查 | 水滴信用 |
+| --- | --- | --- | --- | --- |
+| `companyType` 企业类型 | companyOrgType | EconKind | entType / orgType | company_type |
+| `industry` 行业（国标） | industry2017 / industry | Industry.SubIndustry / Industry.Industry | industry | industry_l2_name / industry_name |
+| `registrationNumber` 注册号 | regNumber | No | regCode / licenseNumber | company_no |
+| `organizationCode` 组织机构代码 | orgNumber | OrgNo | orgNo | org_code |
+| `taxNumber` 纳税识别号 | taxNumber / taxCode | TaxNo | taxNo | tax_number / credit_no |
+| `paidInCapital` 实缴资本 | actualCapital | RecCap | paidinCapital / realCapital | real_capital |
+| `registrationAuthority` 登记机关 | regInstitute / registerInstitute | BelongOrg | authority | authority |
+| `approvedAt` 核准日期 | approvedTime / approveDate | CheckDate（未出现则 null） | annualDate | issue_date |
+| `businessTerm` 营业期限 | businessTerm 或 fromTime/toTime | TermStart/TeamEnd | openTime | operation_date |
+| `employeeScale` 人员规模 | staffNumRange / companyScale | StaffScale / Scale | scale | employee_no |
+| `insuredEmployees` 参保人数原文 | socialStaffNum | Staffs.c | insuranceInfo.insuranceNum | insurance_amount |
+| `formerNames` 曾用名数组 | historyNames | OriginalName[].Name | prevEntName | history_names |
+| `phones` 电话数组 | phoneNumber / phone / phoneList | ContactInfo.PhoneNumber / ContactNumber / TelList | telephone / phoneinfo | phoneList / phones |
+| `emails` 邮箱数组 | emailList / email / emails | ContactInfo.Email / Email / EmailList | email / emailinfo | emailList / emails |
+| `websites` 官网数组 | websiteList / websites | ContactInfo.WebSite[].Url / GW | officialweb / website | websiteList / websites |
 
 路径按顺序选择首个非 null 标量，列表合并去重。整串只由 `-`、`*`、`—`、`/` 等符号组成的占位值（爱企查常见 `"-"`、`"**"`）视为缺失，继续尝试下一路径，最终为 null 或空数组；`0755-2878****` 这类部分掩码原文保留。
 
