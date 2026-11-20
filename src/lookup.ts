@@ -6,7 +6,7 @@ import type { Company, Provider, Source } from './types.js';
 // fallback：按顺序查，第一个成功即返回；all：并行查所有平台，附字段一致性对比。
 // 只接受名称或信用代码精确命中，不会把模糊搜索的第一条当作目标企业。
 export type LookupStrategy = 'fallback' | 'all';
-export const defaultLookupOrder: readonly Source[] = ['qichacha', 'aiqicha', 'tianyancha', 'shuidi'];
+export const defaultLookupOrder: readonly Source[] = ['qichacha', 'aiqicha', 'tianyancha', 'shuidi', 'qixinbao'];
 export interface LookupInput { keyword: string; strategy: LookupStrategy; sources: readonly Source[] }
 export interface LookupAttempt {
   source: Source; status: 'ok' | 'not_found' | 'skipped' | 'error'; durationMs: number;

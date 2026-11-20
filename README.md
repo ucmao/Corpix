@@ -7,13 +7,13 @@
 <p align="center"><strong>多平台企业信息查询与标准化引擎</strong></p>
 
 > **为企业查询后台、客户管理系统与数据服务提供统一的企业信息接口。**  
-> 输入企业名称，查询**天眼查、企查查、爱企查、水滴信用**，将不同平台的工商字段、股东、主要人员、分支机构及年报索引整理成统一 JSON。基于 **TypeScript + Node.js + Fastify**，所有平台均使用 HTTP 请求，无需启动浏览器。
+> 输入企业名称，查询**天眼查、企查查、爱企查、水滴信用、启信宝**，将不同平台的工商字段、股东、主要人员、分支机构、变更记录及年报索引整理成统一 JSON。基于 **TypeScript + Node.js + Fastify**，所有平台均使用 HTTP 请求，无需启动浏览器。
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D22.0.0-green.svg" alt="Node.js >= 22">
   <img src="https://img.shields.io/badge/TypeScript-5.x-blue.svg" alt="TypeScript">
-  <a href="docs/live-verification.md"><img src="https://img.shields.io/badge/Platforms-4%20verified-blue.svg" alt="4 platforms verified"></a>
+  <a href="docs/live-verification.md"><img src="https://img.shields.io/badge/Platforms-5%20verified-blue.svg" alt="5 platforms verified"></a>
   <a href="Dockerfile"><img src="https://img.shields.io/badge/Docker-Config%20included-2496ED.svg" alt="Docker configuration included"></a>
 </p>
 
@@ -36,14 +36,14 @@
 
 ### 核心能力
 
-- **四平台搜索与详情**：天眼查、水滴信用支持匿名查询已验证；企查查、爱企查支持部署端配置 Cookie。
+- **五平台搜索与详情**：天眼查、水滴信用、启信宝支持基础查询已验证；企查查、爱企查支持部署端配置 Cookie。
 - **统一工商字段**：9 个基础字段，另提供 15 个工商扩展字段，覆盖行业、实缴资本、登记机关、联系方式等。
-- **模块化关联记录**：按实际返回的数据整理股东、主要人员、分支机构及年报索引。
+- **模块化关联记录**：按实际返回的数据整理股东、主要人员、分支机构、变更记录及年报索引。
 - **保留数据边界**：区分未请求、未返回、受限、结构变化和部分列表，不把空列表默认当作无记录。
 - **纯 TypeScript 实现**：HTTP 请求、签名、数字解码、映射与 API 使用同一技术栈，无 Python 运行依赖。
-- **便于扩展来源**：Provider、字段映射和来源能力集中管理，可继续添加启信宝等适配器。
+- **便于扩展来源**：Provider、字段映射和来源能力集中管理。
 
-**当前版本为 `0.1.0`，处于实验阶段。** 已完成四平台搜索与详情的联网抽样验证；实际可用性受会话、账号权限及源站变化影响，具体范围见 [联网验证记录](docs/live-verification.md)。
+**当前版本为 `0.1.0`，处于实验阶段。** 已完成五平台搜索与详情的联网抽样验证；实际可用性受会话、账号权限及源站变化影响，具体范围见 [联网验证记录](docs/live-verification.md)。
 
 ---
 
@@ -96,6 +96,9 @@ TYC_COOKIE=
 # 水滴信用按需配置；基础搜索和详情默认支持匿名使用
 SHUIDI_COOKIE=
 
+# 启信宝按需配置；企业详情默认支持匿名使用，搜索和高频调用建议配置
+QXB_COOKIE=
+
 # 本机开发可留空；对外监听时必须设置
 API_KEY=
 ```
@@ -127,7 +130,7 @@ Compose 将服务映射到宿主机 `127.0.0.1:3010`，使用各平台 HTTP 适�
 | `POST` | `/api/v1/search` | 按指定平台搜索企业 |
 | `GET` | `/api/v1/companies/:source/:id` | 查询企业详情 |
 
-**最简单的用法**：按企业全称或信用代码统一查询。默认按企查查 → 爱企查 → 天眼查 → 水滴信用的顺序，某个平台失败就自动换下一个；`"strategy": "all"` 会多平台都查并对比字段：
+**最简单的用法**：按企业全称或信用代码统一查询。默认按企查查 → 爱企查 → 天眼查 → 水滴信用 → 启信宝的顺序，某个平台失败就自动换下一个；`"strategy": "all"` 会多平台都查并对比字段：
 
 ```bash
 curl http://127.0.0.1:3010/api/v1/lookup \
@@ -183,8 +186,10 @@ curl http://127.0.0.1:3010/api/v1/companies/qichacha/your-company-id \
 | 天眼查 | `tianyancha` | 已实现 / 已实现 | HTTP；基础搜索、详情已验证匿名可用，其他权限按源站规则 |
 | 企查查 | `qichacha` | 已实现 / 已实现 | HTTP + 有效 Cookie |
 | 爱企查 | `aiqicha` | 已实现 / 已实现 | HTTP + 有效 Cookie；支持数字 pid 与同源 slug 解析 |
+| 水滴信用 | `shuidi` | 已实现 / 已实现 | HTTP；基础搜索、详情已验证匿名可用，可选配置 Cookie |
+| 启信宝 | `qixinbao` | 已实现 / 已实现 | HTTP；详情支持匿名可用，搜索支持匿名/Cookie，提取 SSR 状态并生成确定性签名 |
 
-各平台已接入的股东、人员、分支、年报等模块范围见 [统一模型与映射](docs/field-mapping.md#模块输出)。启信宝、水滴信用尚未接入，扩展方法见 [新增平台指南](docs/field-mapping.md#新增启信宝水滴信用等来源)。
+各平台已接入的股东、人员、分支、年报等模块范围见 [统一模型与映射](docs/field-mapping.md#模块输出)。新增数据源指南见 [统一模型与映射](docs/field-mapping.md#新增数据源指南)。
 
 ---
 

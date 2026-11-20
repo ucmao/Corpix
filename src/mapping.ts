@@ -30,6 +30,16 @@ export const basicFieldMappings = {
     registrationAuthority: ['authority'], approvedAt: ['issue_date'], businessTerm: ['operation_date'],
     employeeScale: ['employee_no'], insuredEmployees: ['insurance_amount'], formerNames: ['history_names'],
     phones: ['phoneList', 'phones'], emails: ['emailList', 'emails'], websites: ['websiteList', 'websites']
+  },
+  qixinbao: {
+    companyType: ['regInfo.econKind', 'econKind'], industry: ['industryName', 'industry', 'regInfo.industry'],
+    registrationNumber: ['regInfo.regNo', 'regNo'], organizationCode: ['regInfo.orgNo', 'orgNo'],
+    taxNumber: ['regInfo.creditNo', 'creditNo'], paidInCapital: ['regInfo.actualCapi', 'actualCapi'],
+    registrationAuthority: ['regInfo.belongOrg', 'belongOrg'], approvedAt: ['regInfo.checkDate', 'checkDate', 'regInfo.approvedTime'],
+    businessTerm: ['regInfo.businessTerm', 'businessTerm'], employeeScale: ['staffNumRange', 'scale'],
+    insuredEmployees: ['socialStaffNum', 'insuranceNum'], formerNames: ['historyNames'],
+    phones: ['phone', 'phones', 'phoneList'], emails: ['email', 'emails', 'emailList'],
+    websites: ['websites', 'websiteList', 'domainList']
   }
 } satisfies Record<Source, Record<keyof BasicDetails, string[]>>;
 

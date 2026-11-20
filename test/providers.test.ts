@@ -5,6 +5,7 @@ import { Tianyancha, tycHeaders } from '../src/providers/tianyancha.js';
 import { Aiqicha, decodeDdw } from '../src/providers/aiqicha.js';
 import { Qichacha, signQcc } from '../src/providers/qichacha.js';
 import { Shuidi, parseShuidiCards } from '../src/providers/shuidi.js';
+import { Qixinbao, signQxb, extractQxbState, normalizeQxb } from '../src/providers/qixinbao.js';
 import { CorpixError } from '../src/errors.js';
 const code = (expected: string) => (e: unknown) => e instanceof CorpixError && e.code === expected;
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status });
@@ -226,4 +227,152 @@ test('水滴信用详情聚合工商、股东、高管、分支及年报，无�
 
   const notFoundHttp = new HttpClient(1000, async () => json({ status: 0, data: { company_name: null } }));
   await assert.rejects(new Shuidi(notFoundHttp).detail(digest), code('NOT_FOUND'));
+});
+
+test('启信宝签名生成确定性请求头，支持状态提取与搜索卡片归一化', async () => {
+  const sign = signQxb('/api/search/advanceSearch2', { keyword: '测试', page: 1 });
+  assert.equal(typeof sign.name, 'string');
+  assert.equal(sign.name.length, 20);
+  assert.equal(typeof sign.value, 'string');
+  assert.equal(sign.value.length, 128); // sha512 hex is 128 chars
+
+  const sampleState = {
+    route: { name: 'search', path: '/search/测试.html' },
+    search: {
+      searchResult: {
+        total: 1,
+        items: [{
+          eid: '4c8bd41b-2534-43c0-8643-5bf4dca1991e',
+          name: '<em>启信</em><em>科技</em>股份有限公司',
+          operName: '张三',
+          startDate: '2021-05-20',
+          regCapiDesc: '5000万元',
+          status: '存续',
+          address: '北京市海淀区中关村南大街1号'
+        }]
+      }
+    }
+  };
+  const html = `<html><head><script>window.__INITIAL_STATE__=${JSON.stringify(sampleState)};(function(){})();</script></head><body></body></html>`;
+  const extracted = extractQxbState(html);
+  assert.deepEqual(extracted.route, sampleState.route);
+
+  const http = new HttpClient(1000, async (url, init) => {
+    assert.ok(String(url).includes('/search/%E6%B5%8B%E8%AF%95.html'));
+    assert.equal(new Headers(init?.headers).get('cookie'), 'sid=qxb-token');
+    return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
+  });
+
+  const provider = new Qixinbao(http, 'sid=qxb-token');
+  const res = await provider.search({ keyword: '测试', page: 1, pageSize: 10 });
+  assert.equal(res.companies.length, 1);
+  const c = res.companies[0]!;
+  assert.equal(c.id, '4c8bd41b-2534-43c0-8643-5bf4dca1991e');
+  assert.equal(c.name, '启信科技股份有限公司');
+  assert.equal(c.legalRepresentative, '张三');
+  assert.equal(c.establishedAt, '2021-05-20');
+  assert.equal(c.registeredCapital, '5000万元');
+  assert.equal(c.registrationStatus, '存续');
+  assert.equal(res.pagination?.total, 1);
+
+  // 验证登录跳转时抛出 AUTH_REQUIRED
+  const loginStateHtml = `<html><script>window.__INITIAL_STATE__=${JSON.stringify({
+    route: { name: 'login', path: '/auth/login' }
+  })};</script></html>`;
+  const loginHttp = new HttpClient(1000, async () => new Response(loginStateHtml, { status: 200 }));
+  await assert.rejects(new Qixinbao(loginHttp).search({ keyword: '测试', page: 1, pageSize: 10 }), code('AUTH_REQUIRED'));
+});
+
+test('启信宝详情提取多模块、处理非合法 ID 与企业未找到', async () => {
+  const eid = '4c8bd41b-2534-43c0-8643-5bf4dca1991e';
+  const detailState = {
+    route: { name: 'company', path: `/company/${eid}` },
+    enterprise: {
+      mentInfo: {
+        eid,
+        name: '启信科技有限公司',
+        operName: '李四',
+        startDate: '2018-08-08',
+        regCapi: '10000 万元',
+        address: '北京市朝阳区建国门外大街1号',
+        industry: '科技推广和应用服务业',
+        industryName: '科学研究和技术服务业',
+        phone: '010-6505****',
+        email: 'contact@qixin.test',
+        regInfo: {
+          regNo: '110000000000000',
+          orgNo: 'MA0000000',
+          creditNo: '91110000MA0000000X',
+          status: '存续',
+          econKind: '有限责任公司（自然人独资）',
+          scope: '技术开发、技术推广、技术服务。',
+          businessTerm: '2018-08-08 至 2038-08-07',
+          belongOrg: '朝阳区市场监督管理局'
+        },
+        partnerInfo: {
+          total: 1,
+          items: [{ stockName: '股东王五', percent: '100%', shouldCapi: '10000万元', shoudDate: '2018-08-08', stockType: '自然人' }]
+        },
+        employeeInfo: {
+          total: 1,
+          items: [{ name: '李四', title: '执行董事,经理' }]
+        },
+        branchInfo: {
+          total: 1,
+          items: [{ eid: '5c8bd41b-2534-43c0-8643-5bf4dca1991f', name: '启信科技有限公司上海分公司', operName: '赵六' }]
+        },
+        changeRecordInfo: {
+          total: 1,
+          items: [{ date: '2022-01-01', item: '法定代表人变更', before: '张三', after: '李四' }]
+        },
+        yearReport: {
+          total: 1,
+          items: [{ reportYear: '2023年度', reportDate: '2024-05-01' }]
+        },
+        investInfo: {
+          total: 1,
+          items: [{ eid: '6c8bd41b-2534-43c0-8643-5bf4dca19920', name: '启信全资子公司', stock_percentage: '100%', operName: '李四' }]
+        }
+      }
+    }
+  };
+  const html = `<html><head><script>window.__INITIAL_STATE__=${JSON.stringify(detailState)};</script></head></html>`;
+
+  const http = new HttpClient(1000, async (url) => {
+    assert.ok(String(url).includes(`/company/${eid}`));
+    return new Response(html, { status: 200, headers: { 'content-type': 'text/html' } });
+  });
+
+  const provider = new Qixinbao(http);
+  await assert.rejects(provider.detail('not-a-uuid'), code('INVALID_INPUT'));
+
+  const res = await provider.detail(eid);
+  const c = res.companies[0]!;
+  assert.equal(c.name, '启信科技有限公司');
+  assert.equal(c.creditCode, '91110000MA0000000X');
+  assert.equal(c.legalRepresentative, '李四');
+  assert.equal(c.basic?.companyType, '有限责任公司（自然人独资）');
+  assert.deepEqual(c.basic?.phones, ['010-6505****']);
+  assert.deepEqual(c.basic?.emails, ['contact@qixin.test']);
+  assert.equal(c.modules?.shareholders.items.length, 1);
+  assert.equal(c.modules?.shareholders.items[0]?.name, '股东王五');
+  assert.equal(c.modules?.shareholders.items[0]?.ownershipRatio, 1);
+  assert.equal(c.modules?.people.items.length, 1);
+  assert.deepEqual(c.modules?.people.items[0]?.positions, ['执行董事', '经理']);
+  assert.equal(c.modules?.branches.items.length, 1);
+  assert.equal(c.modules?.branches.items[0]?.name, '启信科技有限公司上海分公司');
+  assert.equal(c.modules?.changes.items.length, 1);
+  assert.equal(c.modules?.changes.items[0]?.item, '法定代表人变更');
+  assert.equal(c.modules?.annualReports.items.length, 1);
+  assert.equal(c.modules?.annualReports.items[0]?.year, '2023');
+  assert.equal(c.modules?.investments.items.length, 1);
+  assert.equal(c.modules?.investments.items[0]?.name, '启信全资子公司');
+
+  // 验证企业未找到时报 NOT_FOUND
+  const notFoundHtml = `<html><script>window.__INITIAL_STATE__=${JSON.stringify({
+    route: { name: 'company' },
+    enterprise: { mentInfo: {} }
+  })};</script></html>`;
+  const notFoundHttp = new HttpClient(1000, async () => new Response(notFoundHtml, { status: 200 }));
+  await assert.rejects(new Qixinbao(notFoundHttp).detail(eid), code('NOT_FOUND'));
 });

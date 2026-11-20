@@ -13,23 +13,23 @@
 
 ## 工商扩展信息 basic
 
-| 统一字段 | 天眼查 | 企查查 | 爱企查 | 水滴信用 |
-| --- | --- | --- | --- | --- |
-| `companyType` 企业类型 | companyOrgType | EconKind | entType / orgType | company_type |
-| `industry` 行业（国标） | industry2017 / industry | Industry.SubIndustry / Industry.Industry | industry | industry_l2_name / industry_name |
-| `registrationNumber` 注册号 | regNumber | No | regCode / licenseNumber | company_no |
-| `organizationCode` 组织机构代码 | orgNumber | OrgNo | orgNo | org_code |
-| `taxNumber` 纳税识别号 | taxNumber / taxCode | TaxNo | taxNo | tax_number / credit_no |
-| `paidInCapital` 实缴资本 | actualCapital | RecCap | paidinCapital / realCapital | real_capital |
-| `registrationAuthority` 登记机关 | regInstitute / registerInstitute | BelongOrg | authority | authority |
-| `approvedAt` 核准日期 | approvedTime / approveDate | CheckDate（未出现则 null） | annualDate | issue_date |
-| `businessTerm` 营业期限 | businessTerm 或 fromTime/toTime | TermStart/TeamEnd | openTime | operation_date |
-| `employeeScale` 人员规模 | staffNumRange / companyScale | StaffScale / Scale | scale | employee_no |
-| `insuredEmployees` 参保人数原文 | socialStaffNum | Staffs.c | insuranceInfo.insuranceNum | insurance_amount |
-| `formerNames` 曾用名数组 | historyNames | OriginalName[].Name | prevEntName | history_names |
-| `phones` 电话数组 | phoneNumber / phone / phoneList | ContactInfo.PhoneNumber / ContactNumber / TelList | telephone / phoneinfo | phoneList / phones |
-| `emails` 邮箱数组 | emailList / email / emails | ContactInfo.Email / Email / EmailList | email / emailinfo | emailList / emails |
-| `websites` 官网数组 | websiteList / websites | ContactInfo.WebSite[].Url / GW | officialweb / website | websiteList / websites |
+| 统一字段 | 天眼查 | 企查查 | 爱企查 | 水滴信用 | 启信宝 |
+| --- | --- | --- | --- | --- | --- |
+| `companyType` 企业类型 | companyOrgType | EconKind | entType / orgType | company_type | regInfo.econKind / econKind |
+| `industry` 行业（国标） | industry2017 / industry | Industry.SubIndustry / Industry.Industry | industry | industry_l2_name / industry_name | industryName / industry |
+| `registrationNumber` 注册号 | regNumber | No | regCode / licenseNumber | company_no | regInfo.regNo / regNo |
+| `organizationCode` 组织机构代码 | orgNumber | OrgNo | orgNo | org_code | regInfo.orgNo / orgNo |
+| `taxNumber` 纳税识别号 | taxNumber / taxCode | TaxNo | taxNo | tax_number / credit_no | regInfo.creditNo / creditNo |
+| `paidInCapital` 实缴资本 | actualCapital | RecCap | paidinCapital / realCapital | real_capital | regInfo.actualCapi / actualCapi |
+| `registrationAuthority` 登记机关 | regInstitute / registerInstitute | BelongOrg | authority | authority | regInfo.belongOrg / belongOrg |
+| `approvedAt` 核准日期 | approvedTime / approveDate | CheckDate（未出现则 null） | annualDate | issue_date | regInfo.checkDate / checkDate |
+| `businessTerm` 营业期限 | businessTerm 或 fromTime/toTime | TermStart/TeamEnd | openTime | operation_date | regInfo.businessTerm / businessTerm |
+| `employeeScale` 人员规模 | staffNumRange / companyScale | StaffScale / Scale | scale | employee_no | staffNumRange / scale |
+| `insuredEmployees` 参保人数原文 | socialStaffNum | Staffs.c | insuranceInfo.insuranceNum | insurance_amount | socialStaffNum / insuranceNum |
+| `formerNames` 曾用名数组 | historyNames | OriginalName[].Name | prevEntName | history_names | historyNames |
+| `phones` 电话数组 | phoneNumber / phone / phoneList | ContactInfo.PhoneNumber / ContactNumber / TelList | telephone / phoneinfo | phoneList / phones | phone / phones / phoneList |
+| `emails` 邮箱数组 | emailList / email / emails | ContactInfo.Email / Email / EmailList | email / emailinfo | emailList / emails | email / emails / emailList |
+| `websites` 官网数组 | websiteList / websites | ContactInfo.WebSite[].Url / GW | officialweb / website | websiteList / websites | websites / websiteList / domainList |
 
 路径按顺序选择首个非 null 标量，列表合并去重。整串只由 `-`、`*`、`—`、`/` 等符号组成的占位值（爱企查常见 `"-"`、`"**"`）视为缺失，继续尝试下一路径，最终为 null 或空数组；`0755-2878****` 这类部分掩码原文保留。
 
@@ -70,14 +70,14 @@
 
 在样本中爱企查部分空块返回 `limitForward.limitStatus="2"`；目前仅保留为 `restriction.code`，没有充分依据将未知枚举断言为具体会员等级或验证码原因。它与空列表同时出现时不会当作明确无记录。HTTP/业务级拒绝仍通过统一 API 错误返回。
 
-| 模块 | 天眼查当前详情 | 企查查当前详情 | 爱企查当前详情 |
-| --- | --- | --- | --- |
-| `shareholders` | 未返回 | Partners | shareholdersData.list |
-| `people` | 未返回 | Employees | directorsData.list |
-| `branches` | 未返回 | Branches（样本部分仅计数、无明细） | branchsData.list（可能只有前 10 项） |
-| `annualReports` | 未返回 | 未返回 | annualReportData.list，仅标题、年份、链接 |
-| `investments` | 未返回 | 未返回 | 有计数与限制信息，尚未取得可验证明细 |
-| `changes` | 未返回 | 未返回 | 有计数与限制信息，尚未取得可验证明细 |
+| 模块 | 天眼查当前详情 | 企查查当前详情 | 爱企查当前详情 | 水滴信用当前详情 | 启信宝当前详情 |
+| --- | --- | --- | --- | --- | --- |
+| `shareholders` | 未返回 | Partners | shareholdersData.list | partners | partnerInfo.items |
+| `people` | 未返回 | Employees | directorsData.list | employees | employeeInfo.items |
+| `branches` | 未返回 | Branches（样本部分仅计数、无明细） | branchsData.list（可能只有前 10 项） | branches | branchInfo.items |
+| `annualReports` | 未返回 | 未返回 | annualReportData.list，仅标题、年份、链接 | annualReports | yearReport.items |
+| `investments` | 未返回 | 未返回 | 有计数与限制信息，尚未取得可验证明细 | 未返回 | investInfo.items |
+| `changes` | 未返回 | 未返回 | 有计数与限制信息，尚未取得可验证明细 | changes | changeRecordInfo.items |
 
 未额外请求其他平台模块接口，不自动翻页，不自动切换账号或浏览器。投资/变更已预留统一模型并保留状态及来源计数，**尚未完成实际明细字段映射**；需取得成功响应后再实现。天眼查其他模块未接入，不代表其平台不存在对应数据。
 
@@ -101,7 +101,7 @@
 
 工商日期（成立、核准、认缴等）统一输出为中国本地日历日 `YYYY-MM-DD`（按 UTC+8 计算）。企查查数值日期按秒/毫秒数量级分别转换，非正日期哨兵返回 null；天眼查按已观察到的毫秒转换，0 视为缺失。`2000/1/5`、`2000年01月05日` 等字符串规范为 `YYYY-MM-DD`，无法识别的原文（如“无固定期限”）保持不变。`fetchedAt` 是查询时刻，仍为 UTC ISO 时间。
 
-## 新增启信宝、水滴信用等来源
+## 新增数据源指南
 
 尚未接入或联网验证这些来源，不预置假 Provider。新增流程：
 

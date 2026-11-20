@@ -1,4 +1,4 @@
-export const sources = ['tianyancha', 'qichacha', 'aiqicha', 'shuidi'] as const;
+export const sources = ['tianyancha', 'qichacha', 'aiqicha', 'shuidi', 'qixinbao'] as const;
 export type Source = typeof sources[number];
 export type ObjectData = Record<string, unknown>;
 export interface Company {

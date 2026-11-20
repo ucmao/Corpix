@@ -253,3 +253,105 @@ test('水滴信用基础字段映射与模块结构归一化', () => {
   assert.equal(modules.changes.status, 'ok');
   assert.equal(modules.changes.items[0]?.item, '地址变更');
 });
+
+test('启信宝基础字段映射与模块结构归一化', () => {
+  const mentInfo = {
+    eid: '4c8bd41b-2534-43c0-8643-5bf4dca1991e',
+    name: '示例启信企业',
+    operName: '法定代表人张三',
+    regCapi: '2000万元',
+    startDate: '2020-05-15',
+    address: '北京市海淀区',
+    industry: '软件开发',
+    industryName: '信息传输、软件和信息技术服务业',
+    phone: '010-8888****',
+    email: '****',
+    websites: ['https://example.qixin.test'],
+    regInfo: {
+      regNo: '110108000000000',
+      orgNo: 'MA0011223',
+      creditNo: '91110108MA0011223Y',
+      status: '存续（在营、开业、在册）',
+      econKind: '有限责任公司',
+      actualCapi: '1500万元',
+      belongOrg: '海淀区市场监督管理局',
+      checkDate: '2023-01-01',
+      businessTerm: '2020-05-15 至 无固定期限'
+    },
+    staffNumRange: '50-99人',
+    socialStaffNum: '85人',
+    historyNames: ['曾用名启信'],
+    partnerInfo: {
+      total: 1,
+      items: [{
+        stockName: '母公司股东',
+        eid: '11111111-2222-3333-4444-555555555555',
+        percent: '75%',
+        shouldCapi: '1500万元',
+        shoudDate: '2020-05-15',
+        stockType: '法人股东'
+      }]
+    },
+    employeeInfo: {
+      total: 1,
+      items: [{ name: '李四', title: '经理,执行董事' }]
+    },
+    branchInfo: {
+      total: 1,
+      items: [{ eid: '22222222-3333-4444-5555-666666666666', name: '分支机构一', status: '存续', operName: '王五' }]
+    },
+    changeRecordInfo: {
+      total: 1,
+      items: [{ date: '2022-06-01', item: '经营范围变更', before: '旧范围', after: '新范围' }]
+    },
+    yearReport: {
+      total: 1,
+      items: [{ reportYear: '2024年度', reportDate: '2025-05-20' }]
+    },
+    investInfo: {
+      total: 1,
+      items: [{ eid: '33333333-4444-5555-6666-777777777777', name: '投资企业一', stock_percentage: '50%', operName: '赵六' }]
+    }
+  };
+
+  const basic = basicDetails('qixinbao', mentInfo);
+  assert.equal(basic.companyType, '有限责任公司');
+  assert.equal(basic.industry, '信息传输、软件和信息技术服务业');
+  assert.equal(basic.registrationNumber, '110108000000000');
+  assert.equal(basic.organizationCode, 'MA0011223');
+  assert.equal(basic.taxNumber, '91110108MA0011223Y');
+  assert.equal(basic.paidInCapital, '1500万元');
+  assert.equal(basic.registrationAuthority, '海淀区市场监督管理局');
+  assert.equal(basic.approvedAt, '2023-01-01');
+  assert.equal(basic.businessTerm, '2020-05-15 至 无固定期限');
+  assert.equal(basic.employeeScale, '50-99人');
+  assert.equal(basic.insuredEmployees, '85人');
+  assert.deepEqual(basic.formerNames, ['曾用名启信']);
+  assert.deepEqual(basic.phones, ['010-8888****']);
+  assert.deepEqual(basic.emails, []);
+  assert.deepEqual(basic.websites, ['https://example.qixin.test']);
+
+  const modules = companyModules('qixinbao', mentInfo, true);
+  assert.equal(modules.shareholders.status, 'ok');
+  assert.equal(modules.shareholders.items[0]?.name, '母公司股东');
+  assert.equal(modules.shareholders.items[0]?.ownershipRatio, 0.75);
+  assert.equal(modules.shareholders.items[0]?.subscribedCapital?.amount, '1500');
+  assert.equal(modules.shareholders.items[0]?.subscribedCapital?.unit, '万');
+
+  assert.equal(modules.people.status, 'ok');
+  assert.deepEqual(modules.people.items[0]?.positions, ['经理', '执行董事']);
+
+  assert.equal(modules.branches.status, 'ok');
+  assert.equal(modules.branches.items[0]?.name, '分支机构一');
+  assert.equal(modules.branches.items[0]?.legalRepresentative, '王五');
+
+  assert.equal(modules.annualReports.status, 'ok');
+  assert.equal(modules.annualReports.items[0]?.year, '2024');
+
+  assert.equal(modules.changes.status, 'ok');
+  assert.equal(modules.changes.items[0]?.item, '经营范围变更');
+
+  assert.equal(modules.investments.status, 'ok');
+  assert.equal(modules.investments.items[0]?.name, '投资企业一');
+  assert.equal(modules.investments.items[0]?.ownershipRatio, 0.5);
+});

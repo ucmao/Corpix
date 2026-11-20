@@ -5,6 +5,7 @@ import { Tianyancha } from './providers/tianyancha.js';
 import { Aiqicha } from './providers/aiqicha.js';
 import { Qichacha } from './providers/qichacha.js';
 import { Shuidi } from './providers/shuidi.js';
+import { Qixinbao } from './providers/qixinbao.js';
 import { HttpQccTransport } from './qcc-http.js';
 
 type Availability = 'inline' | 'index' | 'not_returned';
@@ -31,6 +32,10 @@ export const sourceDefinitions: Record<Source, SourceDefinition> = {
   },
   shuidi: {
     create: (http, c) => new Shuidi(http, c.shuidiCookie), configured: () => true,
+    liveVerified: () => true, modules: { ...absent, shareholders: 'inline', people: 'inline', branches: 'inline', annualReports: 'index', changes: 'inline' }
+  },
+  qixinbao: {
+    create: (http, c) => new Qixinbao(http, c.qxbCookie), configured: () => true,
     liveVerified: () => true, modules: { ...absent, shareholders: 'inline', people: 'inline', branches: 'inline', annualReports: 'index', changes: 'inline' }
   }
 };

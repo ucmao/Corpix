@@ -34,6 +34,15 @@ function shareholder(source: Source, v: unknown): Shareholder | null {
       subscribedCapital: money(subMoney), paidInCapital: money(realMoney),
       subscribedAt: date(firstPay.stock_date ?? p.stock_date ?? p.subscribedAt), kind: text(p.stock_type ?? p.kind) };
   }
+  if (source === 'qixinbao') {
+    const name = text(p.stockName ?? p.name);
+    if (!name) return null;
+    const rawRatio = text(p.percent ?? p.stock_proportion ?? p.ownershipRatioText);
+    return { id: text(p.eid || p.pid || p.id), name, ownershipRatio: ratio(rawRatio), ownershipRatioText: rawRatio,
+      subscribedCapital: money(p.shouldCapi ?? p.subMoney ?? p.subscribedCapital),
+      paidInCapital: money(p.realCapi ?? p.realMoney ?? p.paidInCapital),
+      subscribedAt: date(p.shoudDate ?? p.subDate ?? p.subscribedAt), kind: text(p.stockType ?? p.kind) };
+  }
   const qcc = source === 'qichacha';
   const name = text(qcc ? p.StockName : p.name);
   if (!name) return null;
@@ -49,8 +58,8 @@ function positions(value: unknown): string[] {
 function person(source: Source, v: unknown): Person | null {
   const p = object(v);
   const name = text(source === 'qichacha' ? p.Name : source === 'shuidi' ? p.employee_name ?? p.name : p.name);
-  return name ? { id: text(source === 'qichacha' ? p.KeyNo : source === 'shuidi' ? p.name_id ?? p.id : p.personId), name,
-    positions: positions(source === 'qichacha' ? p.Job : source === 'shuidi' ? p.position : p.title) } : null;
+  return name ? { id: text(source === 'qichacha' ? p.KeyNo : source === 'shuidi' ? p.name_id ?? p.id : p.pid ?? p.personId ?? p.id), name,
+    positions: positions(source === 'qichacha' ? p.Job : source === 'shuidi' ? p.position : p.title ?? p.job ?? p.position) } : null;
 }
 function related(source: Source, v: unknown): RelatedCompany | null {
   const p = object(v);
@@ -58,6 +67,11 @@ function related(source: Source, v: unknown): RelatedCompany | null {
     const name = text(p.branch_name ?? p.company_name ?? p.name);
     return name ? { id: text(p.digest ?? p.id), name, status: text(p.company_status ?? p.status),
       legalRepresentative: text(p.legal_person ?? p.legalRepresentative), ownershipRatio: ratio(p.ownershipRatio) } : null;
+  }
+  if (source === 'qixinbao') {
+    const name = text(p.name);
+    return name ? { id: text(p.eid ?? p.id), name, status: text(p.status),
+      legalRepresentative: text(p.operName ?? p.legalRepresentative), ownershipRatio: ratio(p.stock_percentage ?? p.percent ?? p.ownershipRatio) } : null;
   }
   const qcc = source === 'qichacha', name = text(qcc ? p.Name : p.entName);
   return name ? { id: text(qcc ? p.KeyNo : p.pid), name, status: text(qcc ? p.Status : p.openStatus),
@@ -69,7 +83,7 @@ function annual(v: unknown): AnnualReport | null {
     const year = String(p.x);
     return { year, title: `${year}年度报告`, url: null };
   }
-  const title = text(p.name ?? p.title);
+  const title = text(p.reportYear ?? p.name ?? p.title);
   if (!title) return null;
   let url: string | null = null;
   if (typeof p.link === 'string') {
@@ -79,8 +93,8 @@ function annual(v: unknown): AnnualReport | null {
 }
 function changeRecord(v: unknown): ChangeRecord | null {
   const p = object(v);
-  return { changedAt: date(p.change_date ?? p.changedAt), item: text(p.change_type ?? p.change_field ?? p.item),
-    before: text(p.content_before ?? p.before), after: text(p.content_after ?? p.after) };
+  return { changedAt: date(p.date ?? p.change_date ?? p.changedAt), item: text(p.item ?? p.change_type ?? p.change_field),
+    before: text(p.before ?? p.content_before), after: text(p.after ?? p.content_after) };
 }
 export function companyModules(source: Source, raw: unknown, detail: boolean): CompanyModules {
   const notRequested = <T>() => missing<T>('not_requested', '搜索结果不加载此模块');
@@ -104,6 +118,22 @@ export function companyModules(source: Source, raw: unknown, detail: boolean): C
     result.branches = moduleOf(branches.data ?? p.branchesList, branches.total ?? p.branchesCount, v => related(source, v));
     result.annualReports = moduleOf(annualReports.data ?? p.annualReportsList, annualReports.total ?? p.annualReportsCount, annual);
     result.changes = moduleOf(changes.data ?? p.changesList, changes.total ?? p.changesCount, changeRecord);
+    return result;
+  }
+  if (source === 'qixinbao') {
+    const partnerInfo = object(p.partnerInfo);
+    const employeeInfo = object(p.employeeInfo);
+    const branchInfo = object(p.branchInfo);
+    const changeRecordInfo = object(p.changeRecordInfo);
+    const yearReport = object(p.yearReport);
+    const investInfo = object(p.investInfo);
+
+    result.shareholders = moduleOf(partnerInfo.items ?? p.shareholders, partnerInfo.total ?? p.shareholdersCount, v => shareholder(source, v));
+    result.people = moduleOf(employeeInfo.items ?? p.employees, employeeInfo.total ?? p.employeesCount, v => person(source, v));
+    result.branches = moduleOf(branchInfo.items ?? p.branches, branchInfo.total ?? p.branchesCount, v => related(source, v));
+    result.annualReports = moduleOf(yearReport.items ?? p.annualReports, yearReport.total ?? p.annualReportsCount, annual);
+    result.changes = moduleOf(changeRecordInfo.items ?? p.changes, changeRecordInfo.total ?? p.changesCount, changeRecord);
+    result.investments = moduleOf(investInfo.items ?? p.investments, investInfo.total ?? p.investmentsCount, v => related(source, v));
     return result;
   }
   const block = <T>(key: string, mapper: (v: unknown) => T | null): DataModule<T> => {
