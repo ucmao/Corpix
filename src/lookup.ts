@@ -1,11 +1,11 @@
 import { CorpixError, type ErrorCode } from './errors.js';
 import { money } from './mapping.js';
-import type { Company, Provider, Source } from './types.js';
+import type { Company, CompanyModules, DataModule, Provider, Source } from './types.js';
 
 // 跨平台统一查询：按企业全称或统一社会信用代码定位同一家企业，再取详情。
-// fallback：按顺序查，第一个成功即返回；all：并行查所有平台，附字段一致性对比。
+// fallback：按顺序查，第一个成功即返回；all：并行查所有平台，附字段一致性对比；merged：并行查所有平台并拼图融合成唯一一份最全企业档案。
 // 只接受名称或信用代码精确命中，不会把模糊搜索的第一条当作目标企业。
-export type LookupStrategy = 'fallback' | 'all';
+export type LookupStrategy = 'fallback' | 'all' | 'merged';
 export const defaultLookupOrder: readonly Source[] = ['qichacha', 'aiqicha', 'tianyancha', 'shuidi', 'qixinbao'];
 export interface LookupInput { keyword: string; strategy: LookupStrategy; sources: readonly Source[] }
 export interface LookupAttempt {
@@ -18,6 +18,7 @@ export interface LookupResult {
   source?: Source; company?: Company;
   results?: Partial<Record<Source, Company>>;
   comparison?: { consistentFields: string[]; differingFields: string[]; fields: Record<string, FieldComparison> };
+  sourcesUsed?: Source[];
   attempts: LookupAttempt[];
 }
 
@@ -90,6 +91,88 @@ export function compareCompanies(results: Partial<Record<Source, Company>>) {
   return { consistentFields: names.filter(f => fields[f]!.consistent), differingFields: names.filter(f => !fields[f]!.consistent), fields };
 }
 
+function scoreModule(m: DataModule<unknown> | undefined): number {
+  if (!m) return -1000;
+  if (m.status === 'ok') return 1000 + (m.items?.length || 0);
+  if (m.status === 'partial') return 500 + (m.items?.length || 0);
+  if (m.status === 'not_returned') return (m.items?.length || 0);
+  return -100;
+}
+
+export function mergeCompanies(results: Partial<Record<Source, Company>>, order: readonly Source[]): { company: Company; sourcesUsed: Source[] } {
+  const entries = order.filter(s => results[s] != null).map(s => [s, results[s]!] as const);
+  if (entries.length === 0) {
+    throw new CorpixError('INTERNAL_ERROR', '没有可用于合并的企业数据');
+  }
+  const sourcesUsed = entries.map(([s]) => s);
+  const primary = entries[0]![1];
+
+  const firstNonNull = <T>(fn: (c: Company) => T | null | undefined): T | null => {
+    for (const [, c] of entries) {
+      const v = fn(c);
+      if (v !== undefined && v !== null && v !== '') return v;
+    }
+    return null;
+  };
+
+  const pickBestModule = <K extends keyof CompanyModules>(key: K): CompanyModules[K] => {
+    let best = entries[0]![1].modules?.[key];
+    let bestScore = scoreModule(best);
+    for (let i = 1; i < entries.length; i++) {
+      const m = entries[i]![1].modules?.[key];
+      const sc = scoreModule(m);
+      if (sc > bestScore) {
+        bestScore = sc;
+        best = m;
+      }
+    }
+    return (best ?? { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null, reason: '未获取到此模块数据' }) as CompanyModules[K];
+  };
+
+  const longestScope = entries.map(([, c]) => c.businessScope).filter((s): s is string => Boolean(s)).sort((a, b) => b.length - a.length)[0] ?? null;
+
+  const company: Company = {
+    source: primary.source,
+    id: primary.id,
+    name: firstNonNull(c => c.name) ?? primary.name,
+    creditCode: firstNonNull(c => c.creditCode),
+    legalRepresentative: firstNonNull(c => c.legalRepresentative),
+    registrationStatus: firstNonNull(c => c.registrationStatus),
+    registeredCapital: firstNonNull(c => c.registeredCapital),
+    establishedAt: firstNonNull(c => c.establishedAt),
+    address: firstNonNull(c => c.address),
+    businessScope: longestScope,
+    sourceUrl: primary.sourceUrl,
+    basic: {
+      companyType: firstNonNull(c => c.basic?.companyType),
+      industry: firstNonNull(c => c.basic?.industry),
+      registrationNumber: firstNonNull(c => c.basic?.registrationNumber),
+      organizationCode: firstNonNull(c => c.basic?.organizationCode),
+      taxNumber: firstNonNull(c => c.basic?.taxNumber),
+      paidInCapital: firstNonNull(c => c.basic?.paidInCapital),
+      registrationAuthority: firstNonNull(c => c.basic?.registrationAuthority),
+      approvedAt: firstNonNull(c => c.basic?.approvedAt),
+      businessTerm: firstNonNull(c => c.basic?.businessTerm),
+      employeeScale: firstNonNull(c => c.basic?.employeeScale),
+      insuredEmployees: firstNonNull(c => c.basic?.insuredEmployees),
+      formerNames: [...new Set(entries.flatMap(([, c]) => c.basic?.formerNames ?? []))],
+      phones: [...new Set(entries.flatMap(([, c]) => c.basic?.phones ?? []))],
+      emails: [...new Set(entries.flatMap(([, c]) => c.basic?.emails ?? []))],
+      websites: [...new Set(entries.flatMap(([, c]) => c.basic?.websites ?? []))]
+    },
+    modules: {
+      shareholders: pickBestModule('shareholders'),
+      people: pickBestModule('people'),
+      branches: pickBestModule('branches'),
+      annualReports: pickBestModule('annualReports'),
+      changes: pickBestModule('changes'),
+      investments: pickBestModule('investments')
+    }
+  };
+
+  return { company, sourcesUsed };
+}
+
 export async function lookup(providers: Record<Source, Provider>, configured: (s: Source) => boolean, input: LookupInput): Promise<LookupResult> {
   const keyword = input.keyword.trim(), byCode = isCreditCode(keyword);
   const base = { strategy: input.strategy, keyword, matchBy: byCode ? 'creditCode' as const : 'name' as const };
@@ -106,6 +189,10 @@ export async function lookup(providers: Record<Source, Provider>, configured: (s
   const results: Partial<Record<Source, Company>> = {};
   for (const r of all) { attempts.push(r.attempt); if (r.company) results[r.attempt.source] = r.company; }
   if (!Object.keys(results).length) throw lookupFailure(attempts);
+  if (input.strategy === 'merged') {
+    const { company, sourcesUsed } = mergeCompanies(results, input.sources);
+    return { ...base, fetchedAt: new Date().toISOString(), company, sourcesUsed, attempts };
+  }
   return { ...base, fetchedAt: new Date().toISOString(), results, comparison: compareCompanies(results), attempts };
 }
 

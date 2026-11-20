@@ -53,7 +53,7 @@ export async function buildApp(options: AppOptions = {}) {
   app.post<{ Body: { keyword: string; strategy: LookupStrategy; sources: Source[] } }>('/api/v1/lookup', {
     schema: { body: { type: 'object', additionalProperties: false, required: ['keyword'], properties: {
       keyword: { type: 'string', minLength: 1, maxLength: 100 },
-      strategy: { type: 'string', enum: ['fallback', 'all'], default: 'fallback' },
+      strategy: { type: 'string', enum: ['fallback', 'all', 'merged'], default: 'fallback' },
       sources: { type: 'array', minItems: 1, maxItems: sources.length, uniqueItems: true,
         items: { type: 'string', enum: sources }, default: [...defaultLookupOrder] } } } }
   }, async (request) => {

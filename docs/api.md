@@ -72,13 +72,14 @@ curl http://127.0.0.1:3010/api/v1/lookup \
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 | :--- | :--- | :---: | :--- | :--- |
 | `keyword` | `string` | 是 | — | 企业全称，或 18 位统一社会信用代码（自动识别） |
-| `strategy` | `string` | 否 | `fallback` | `fallback`：按顺序查，第一个成功即返回；`all`：并行查所有平台并对比字段 |
-| `sources` | `string[]` | 否 | `["qichacha","aiqicha","tianyancha","shuidi"]` | 参与查询的平台及顺序，不可重复 |
+| `strategy` | `string` | 否 | `fallback` | `fallback`：按顺序查，首个成功即返回；`all`：并行查所有平台并对比字段；`merged`：并行查所有平台并拼图融合成唯一一份最全档案 |
+| `sources` | `string[]` | 否 | `["qichacha","aiqicha","tianyancha","shuidi","qixinbao"]` | 参与查询的平台及顺序，不可重复 |
 
 **用途：**
 
 - `fallback`：保证可用性。某平台 Cookie 过期、触发风控或权限不足时自动换下一个平台，返回格式不变。
-- `all`：互补与核验。各平台结果分别放在 `results.<平台>`，`comparison` 列出一致与不一致的字段，可据此按模块选用来源或发现数据矛盾。
+- `all`：互补与核验。各平台结果分别放在 `results.<平台>`，`comparison` 列出一致与不一致的字段，适合做数据审计与差异核对。
+- `merged`：开箱即用最全视图。并发请求所有平台，按“标量空值补齐、列表并集去重、关联模块择优选取”自动融合为唯一的 `company` 对象，并附带 `sourcesUsed`。
 
 **匹配规则：** 只接受精确命中。名称比较忽略全角/半角括号和空白；按信用代码查询时，在详情阶段再次核对信用代码。分公司、简称等模糊结果不会被当作目标企业，所有平台都未精确命中时返回 `404 NOT_FOUND`。
 

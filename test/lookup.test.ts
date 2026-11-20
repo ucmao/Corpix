@@ -134,6 +134,64 @@ test('对比规范化：括号、千分位金额、参保人数"人"后缀', () 
   assert.ok(c.differingFields.includes('basic.paidInCapital'));
 });
 
+test('merged 策略并发查询多平台并拼图融合：非空优先、并集去重、模块择优', async t => {
+  const { options } = setup({
+    qichacha: { detail: company('qichacha', 'q1', {
+      address: null,
+      basic: {
+        companyType: '有限责任公司', industry: '软件', registrationNumber: null, organizationCode: null,
+        taxNumber: null, paidInCapital: null, registrationAuthority: null, approvedAt: null, businessTerm: null,
+        employeeScale: null, insuredEmployees: null, formerNames: ['旧名1'], phones: ['010-1111'], emails: ['a@test.com'], websites: []
+      },
+      modules: {
+        shareholders: { status: 'ok', items: [{ id: 's1', name: '股东1', ownershipRatio: 1, ownershipRatioText: '100%', subscribedCapital: null, paidInCapital: null, subscribedAt: null, kind: null }], total: 1, returnedCount: 1, complete: true },
+        people: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        branches: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        annualReports: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        changes: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        investments: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null }
+      }
+    }) },
+    tianyancha: { detail: company('tianyancha', 't1', {
+      address: '北京市海淀区',
+      basic: {
+        companyType: '有限责任公司', industry: '软件', registrationNumber: '110000', organizationCode: null,
+        taxNumber: null, paidInCapital: null, registrationAuthority: '海淀市监局', approvedAt: '2023-05-20', businessTerm: null,
+        employeeScale: null, insuredEmployees: null, formerNames: ['旧名2'], phones: ['010-2222'], emails: [], websites: ['https://example.com']
+      },
+      modules: {
+        shareholders: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        people: { status: 'ok', items: [{ id: 'p1', name: '高管张三', positions: ['董事'] }], total: 1, returnedCount: 1, complete: true },
+        branches: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        annualReports: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        changes: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null },
+        investments: { status: 'not_returned', items: [], total: null, returnedCount: 0, complete: null }
+      }
+    }) },
+    aiqicha: { search: new CorpixError('ACCESS_DENIED', '无权限', 403) },
+    shuidi: { search: [] },
+    qixinbao: { search: [] }
+  });
+  const app = await buildApp(options); t.after(() => app.close());
+  const res = await app.inject(post({ keyword: NAME, strategy: 'merged' }));
+  assert.equal(res.statusCode, 200);
+  const body = res.json();
+  assert.equal(body.strategy, 'merged');
+  assert.deepEqual(body.sourcesUsed, ['qichacha', 'tianyancha']);
+  const c = body.company;
+  assert.equal(c.name, NAME);
+  assert.equal(c.address, '北京市海淀区');
+  assert.equal(c.basic.approvedAt, '2023-05-20');
+  assert.equal(c.basic.registrationAuthority, '海淀市监局');
+  assert.deepEqual(c.basic.formerNames, ['旧名1', '旧名2']);
+  assert.deepEqual(c.basic.phones, ['010-1111', '010-2222']);
+  assert.deepEqual(c.basic.websites, ['https://example.com']);
+  assert.equal(c.modules.shareholders.status, 'ok');
+  assert.equal(c.modules.shareholders.items[0]?.name, '股东1');
+  assert.equal(c.modules.people.status, 'ok');
+  assert.equal(c.modules.people.items[0]?.name, '高管张三');
+});
+
 test('lookup 拒绝非法策略、重复平台和额外字段，不调用上游', async t => {
   const { options, calls } = setup({});
   const app = await buildApp(options); t.after(() => app.close());
