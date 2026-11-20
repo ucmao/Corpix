@@ -38,7 +38,7 @@ test('fallback 按顺序查询，前一个平台失败或未命中时自动换�
     aiqicha: { search: [company('aiqicha', 'a1', { name: '示例软件有限公司北京分公司' })] }
   });
   const app = await buildApp(options); t.after(() => app.close());
-  const r = await app.inject(post({ keyword: NAME }));
+  const r = await app.inject(post({ keyword: NAME, strategy: 'fallback' }));
   assert.equal(r.statusCode, 200);
   const body = r.json();
   assert.equal(body.source, 'tianyancha');
@@ -53,14 +53,14 @@ test('fallback 按顺序查询，前一个平台失败或未命中时自动换�
 test('fallback 第一个成功即返回，跳过未配置的平台，可自定义顺序', async t => {
   const { options, calls } = setup({}, {});
   const app = await buildApp(options); t.after(() => app.close());
-  const body = (await app.inject(post({ keyword: NAME }))).json();
+  const body = (await app.inject(post({ keyword: NAME, strategy: 'fallback' }))).json();
   assert.equal(body.source, 'tianyancha');
   assert.deepEqual(body.attempts.map((a: { status: string }) => a.status), ['skipped', 'skipped', 'ok']);
   assert.equal(body.attempts[0].error.code, 'NOT_CONFIGURED');
   assert.ok(!calls.some(c => c.startsWith('qichacha')));
   const ordered = setup({});
   const app2 = await buildApp(ordered.options); t.after(() => app2.close());
-  const b2 = (await app2.inject(post({ keyword: NAME, sources: ['aiqicha', 'qichacha'] }))).json();
+  const b2 = (await app2.inject(post({ keyword: NAME, strategy: 'fallback', sources: ['aiqicha', 'qichacha'] }))).json();
   assert.equal(b2.source, 'aiqicha');
   assert.equal(b2.attempts.length, 1);
   assert.ok(!ordered.calls.some(c => c.startsWith('qichacha') || c.startsWith('tianyancha')));
@@ -71,14 +71,14 @@ test('精确匹配：名称忽略全角半角括号，信用代码在详情阶�
     qichacha: { search: [company('qichacha', 'q0', { name: '示例（北京）软件有限公司分公司' }), company('qichacha', 'q1', { name: '示例（北京）软件有限公司' })] }
   });
   const app = await buildApp(options); t.after(() => app.close());
-  const byName = (await app.inject(post({ keyword: '示例(北京)软件有限公司' }))).json();
+  const byName = (await app.inject(post({ keyword: '示例(北京)软件有限公司', strategy: 'fallback' }))).json();
   assert.equal(byName.company.id, 'q1');
   const code = setup({
     qichacha: { search: [company('qichacha', 'q1', { creditCode: null })], detail: company('qichacha', 'q1', { creditCode: '91350100000000001X' }) },
     aiqicha: { search: [company('aiqicha', 'a1', { creditCode: CODE.toLowerCase() })] }
   });
   const app2 = await buildApp(code.options); t.after(() => app2.close());
-  const byCode = (await app2.inject(post({ keyword: CODE.toLowerCase() }))).json();
+  const byCode = (await app2.inject(post({ keyword: CODE.toLowerCase(), strategy: 'fallback' }))).json();
   assert.equal(byCode.matchBy, 'creditCode');
   assert.equal(byCode.source, 'aiqicha');
   assert.equal(byCode.attempts[0].status, 'not_found');
@@ -173,6 +173,12 @@ test('merged 策略并发查询多平台并拼图融合：非空优先、并集�
     qixinbao: { search: [] }
   });
   const app = await buildApp(options); t.after(() => app.close());
+  // 默认不指定 strategy 时，自动采用推荐的 merged 策略
+  const resDefault = await app.inject(post({ keyword: NAME }));
+  assert.equal(resDefault.statusCode, 200);
+  assert.equal(resDefault.json().strategy, 'merged');
+  assert.deepEqual(resDefault.json().sourcesUsed, ['qichacha', 'tianyancha']);
+
   const res = await app.inject(post({ keyword: NAME, strategy: 'merged' }));
   assert.equal(res.statusCode, 200);
   const body = res.json();

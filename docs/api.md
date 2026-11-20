@@ -60,30 +60,63 @@ curl "http://127.0.0.1:3010/api/v1/companies/qichacha/${COMPANY_ID}?raw=false" \
 
 ## 跨平台统一查询（lookup）
 
-按企业**全称**或**统一社会信用代码**查询，由 Corpix 负责搜索、精确匹配和拉取详情，调用方不需要指定平台或处理平台 ID。
+按企业**全称**或**统一社会信用代码**查询，由 Corpix 负责搜索、精确匹配和拉取详情。**默认无需指定 strategy 参数，直接采用 `merged` 模式返回多平台智能拼图融合后的唯一企业档案**。
 
 ```bash
 curl http://127.0.0.1:3010/api/v1/lookup \
   -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer your-api-key' \
-  -d '{ "keyword": "福建正孚软件有限公司", "strategy": "fallback" }'
+  -d '{ "keyword": "福建顶点软件股份有限公司" }'
 ```
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 | :--- | :--- | :---: | :--- | :--- |
 | `keyword` | `string` | 是 | — | 企业全称，或 18 位统一社会信用代码（自动识别） |
-| `strategy` | `string` | 否 | `fallback` | `fallback`：按顺序查，首个成功即返回；`all`：并行查所有平台并对比字段；`merged`：并行查所有平台并拼图融合成唯一一份最全档案 |
+| `strategy` | `string` | 否 | `merged` | `merged`（默认推荐）：并行查所有可用平台并拼图融合成唯一一份最全档案；`fallback`：按顺序查，首个成功即返回；`all`：并行查所有平台并对比字段 |
 | `sources` | `string[]` | 否 | `["qichacha","aiqicha","tianyancha","shuidi","qixinbao"]` | 参与查询的平台及顺序，不可重复 |
 
-**用途：**
+**三种策略用途：**
 
-- `fallback`：保证可用性。某平台 Cookie 过期、触发风控或权限不足时自动换下一个平台，返回格式不变。
-- `all`：互补与核验。各平台结果分别放在 `results.<平台>`，`comparison` 列出一致与不一致的字段，适合做数据审计与差异核对。
-- `merged`：开箱即用最全视图。并发请求所有平台，按“标量空值补齐、列表并集去重、关联模块择优选取”自动融合为唯一的 `company` 对象，并附带 `sourcesUsed`。
+- `merged`（**默认推荐**）：开箱即用最全视图。并发请求所有平台，按“标量空值补齐、列表并集去重、关联模块择优选取”自动融合为唯一的 `company` 对象，并附带 `sourcesUsed`。如果 A 平台缺了某个字段而 B 平台有，自动补齐；联系方式自动合并去重。
+- `fallback`：最快可用性兜底。按顺序逐个查询，首个成功立即返回，某平台 Cookie 过期或风控时自动换下一个平台。
+- `all`：数据核验与审计。各平台结果分别放在 `results.<平台>`，`comparison` 列出一致与不一致的字段。
 
 **匹配规则：** 只接受精确命中。名称比较忽略全角/半角括号和空白；按信用代码查询时，在详情阶段再次核对信用代码。分公司、简称等模糊结果不会被当作目标企业，所有平台都未精确命中时返回 `404 NOT_FOUND`。
 
-**fallback 返回（节选）：**
+**merged 返回（默认，节选）：**
+
+```json
+{
+  "strategy": "merged",
+  "keyword": "福建顶点软件股份有限公司",
+  "matchBy": "name",
+  "fetchedAt": "2026-11-20T02:12:42.958Z",
+  "sourcesUsed": ["tianyancha", "shuidi"],
+  "company": {
+    "source": "tianyancha",
+    "id": "11566205",
+    "name": "福建顶点软件股份有限公司",
+    "creditCode": "91350000260188521B",
+    "legalRepresentative": "严孟宇",
+    "registrationStatus": "存续",
+    "registeredCapital": "20537.6359万人民币",
+    "address": "福建省福州市鼓楼区铜盘路软件大道89号A区13号楼",
+    "basic": {
+      "approvedAt": "2026-07-14",
+      "paidInCapital": "20538.6979万人民币",
+      "phones": ["0591-8786****", "400-8009****", "..."],
+      "emails": ["apex@apexsoft.com.cn", "..."]
+    },
+    "modules": {
+      "shareholders": { "status": "ok", "total": 20, "returnedCount": 20, "items": [ "..." ] },
+      "annualReports": { "status": "ok", "total": 13, "returnedCount": 13, "items": [ "..." ] }
+    }
+  },
+  "attempts": [ "..." ]
+}
+```
+
+**fallback 返回（显式指定 strategy: "fallback"，节选）：**
 
 ```json
 {
@@ -99,7 +132,7 @@ curl http://127.0.0.1:3010/api/v1/lookup \
 }
 ```
 
-**all 返回（节选）：**
+**all 返回（显式指定 strategy: "all"，节选）：**
 
 ```json
 {

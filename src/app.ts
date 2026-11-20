@@ -50,14 +50,14 @@ export async function buildApp(options: AppOptions = {}) {
     const { raw: original, ...output } = result;
     return input.raw ? { ...output, raw: original } : output;
   });
-  app.post<{ Body: { keyword: string; strategy: LookupStrategy; sources: Source[] } }>('/api/v1/lookup', {
+  app.post<{ Body: { keyword: string; strategy?: LookupStrategy; sources?: Source[] } }>('/api/v1/lookup', {
     schema: { body: { type: 'object', additionalProperties: false, required: ['keyword'], properties: {
       keyword: { type: 'string', minLength: 1, maxLength: 100 },
-      strategy: { type: 'string', enum: ['fallback', 'all', 'merged'], default: 'fallback' },
+      strategy: { type: 'string', enum: ['merged', 'fallback', 'all'], default: 'merged' },
       sources: { type: 'array', minItems: 1, maxItems: sources.length, uniqueItems: true,
         items: { type: 'string', enum: sources }, default: [...defaultLookupOrder] } } } }
   }, async (request) => {
-    const { keyword, strategy, sources: order } = request.body;
+    const { keyword, strategy = 'merged', sources: order = [...defaultLookupOrder] } = request.body;
     if (!keyword.trim()) fail('INVALID_INPUT', '查询词不能为空', 400);
     return lookup(providers, s => sourceDefinitions[s].configured(config), { keyword, strategy, sources: order });
   });

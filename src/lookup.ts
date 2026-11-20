@@ -3,11 +3,11 @@ import { money } from './mapping.js';
 import type { Company, CompanyModules, DataModule, Provider, Source } from './types.js';
 
 // 跨平台统一查询：按企业全称或统一社会信用代码定位同一家企业，再取详情。
-// fallback：按顺序查，第一个成功即返回；all：并行查所有平台，附字段一致性对比；merged：并行查所有平台并拼图融合成唯一一份最全企业档案。
+// merged（默认推荐）：并行查所有可用平台并拼图融合成唯一一份最全企业档案；fallback：按顺序查，第一个成功即返回；all：并行查所有平台，附字段一致性对比。
 // 只接受名称或信用代码精确命中，不会把模糊搜索的第一条当作目标企业。
-export type LookupStrategy = 'fallback' | 'all' | 'merged';
+export type LookupStrategy = 'merged' | 'fallback' | 'all';
 export const defaultLookupOrder: readonly Source[] = ['qichacha', 'aiqicha', 'tianyancha', 'shuidi', 'qixinbao'];
-export interface LookupInput { keyword: string; strategy: LookupStrategy; sources: readonly Source[] }
+export interface LookupInput { keyword: string; strategy?: LookupStrategy; sources?: readonly Source[] }
 export interface LookupAttempt {
   source: Source; status: 'ok' | 'not_found' | 'skipped' | 'error'; durationMs: number;
   error?: { code: ErrorCode; message: string };
@@ -175,22 +175,24 @@ export function mergeCompanies(results: Partial<Record<Source, Company>>, order:
 
 export async function lookup(providers: Record<Source, Provider>, configured: (s: Source) => boolean, input: LookupInput): Promise<LookupResult> {
   const keyword = input.keyword.trim(), byCode = isCreditCode(keyword);
-  const base = { strategy: input.strategy, keyword, matchBy: byCode ? 'creditCode' as const : 'name' as const };
+  const strategy = input.strategy ?? 'merged';
+  const sources = input.sources ?? defaultLookupOrder;
+  const base = { strategy, keyword, matchBy: byCode ? 'creditCode' as const : 'name' as const };
   const attempts: LookupAttempt[] = [];
-  if (input.strategy === 'fallback') {
-    for (const source of input.sources) {
+  if (strategy === 'fallback') {
+    for (const source of sources) {
       const r = await attempt(source, providers[source], configured(source), keyword, byCode);
       attempts.push(r.attempt);
       if (r.company) return { ...base, fetchedAt: new Date().toISOString(), source, company: r.company, attempts };
     }
     throw lookupFailure(attempts);
   }
-  const all = await Promise.all(input.sources.map(s => attempt(s, providers[s], configured(s), keyword, byCode)));
+  const all = await Promise.all(sources.map(s => attempt(s, providers[s], configured(s), keyword, byCode)));
   const results: Partial<Record<Source, Company>> = {};
   for (const r of all) { attempts.push(r.attempt); if (r.company) results[r.attempt.source] = r.company; }
   if (!Object.keys(results).length) throw lookupFailure(attempts);
-  if (input.strategy === 'merged') {
-    const { company, sourcesUsed } = mergeCompanies(results, input.sources);
+  if (strategy === 'merged') {
+    const { company, sourcesUsed } = mergeCompanies(results, sources);
     return { ...base, fetchedAt: new Date().toISOString(), company, sourcesUsed, attempts };
   }
   return { ...base, fetchedAt: new Date().toISOString(), results, comparison: compareCompanies(results), attempts };
